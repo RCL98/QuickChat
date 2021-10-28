@@ -37,7 +37,6 @@ export default function OptionsBar(props) {
   };
 
   const startChat = (event) => {
-    console.log(event.target.id);
     setChosenOption(event.target.id);
     setOpenStartChatDialog(true);
   };

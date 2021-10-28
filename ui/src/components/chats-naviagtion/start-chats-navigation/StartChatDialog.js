@@ -23,19 +23,19 @@ export default function StartChatDialog(props) {
   const [lookupText, setLookupText] = React.useState("");
   const [checked, setChecked] = React.useState([]);
   const [users, setUsers] = React.useState([]);
+  const [renderedUsers, setRenderedUsers] = React.useState([]);
   const sessionId = useSelector((state) => state.profile.sessionId);
 
   const dispatch = useDispatch();
 
   const getUsersList = () => {
-    console.log(props.open.value);
     if (props.open.value) {
-      console.log("Get Users");
       axios
         .get(serverHost + `/users/${sessionId}`)
         .then(function (response) {
           console.log(response.data);
           setUsers(response.data);
+          setRenderedUsers(response.data);
         })
         .catch(function (error) {
           console.error(error);
@@ -106,8 +106,14 @@ export default function StartChatDialog(props) {
     makeCreateRequest(path, chatName, partners, type);
   };
 
-  const handleLookup = (text) => {
-    setLookupText(text);
+  const handleLookup = (event) => {
+    setLookupText(event.target.value);
+    if (event.target.value !== "") {
+      const reg = new RegExp("\\w*" + event.target.value + "\\w*");
+      setRenderedUsers(users.filter((user) => reg.test(user.name)));
+    } else {
+      setRenderedUsers(users);
+    }
   };
 
   const handleClose = () => {
@@ -168,7 +174,7 @@ export default function StartChatDialog(props) {
           </div>
 
           <div id="users-list" style={{ justifyContent: "center", alignItems: "center" }}>
-            <UsersListCheck users={users} checked={checked} handleToggle={handleToggle} />
+            <UsersListCheck users={renderedUsers} checked={checked} handleToggle={handleToggle} />
           </div>
         </div>
       </DialogContent>
