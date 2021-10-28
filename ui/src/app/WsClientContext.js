@@ -61,14 +61,8 @@ const messageFilter = (message) => {
           store.dispatch(usernameUpdated(generalMessage.content));
           break;
 
-        case constants.USER_IS_WRITING:
-          console.log(generalMessage);
-          store.dispatch(currentyWritingUpdated({ id: generalMessage.content.id, isWriting: true }));
-          break;
-
-        case constants.USER_STOPPED_WRITING:
-          console.log(generalMessage);
-          store.dispatch(currentyWritingUpdated({ id: generalMessage.content.id, isWriting: false }));
+        case constants.UPDATE_WHO_IS_WRITING:
+          store.dispatch(currentyWritingUpdated(generalMessage.content));
           break;
 
         default:
