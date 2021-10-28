@@ -13,6 +13,8 @@ import com.circ.quickchat.entity.Conversation;
 import com.circ.quickchat.entity.User;
 import com.circ.quickchat.repositories.ConversationRepository;
 
+import DTO.SimpleConversationDTO;
+
 @Service
 public class ConversationService {
 	
@@ -51,5 +53,16 @@ public class ConversationService {
 				.stream().filter(conv -> conv.getChat().getUsers().stream()
 						.anyMatch(usr -> usr.getId().equals(user.getId())))
 				.collect(Collectors.toList());
+	}
+	
+	public void updateConversationForUser(String userSessionId, SimpleConversationDTO simpleConversationDTO) {
+		User user = userService.getUserBySessionId(userSessionId);
+		Conversation conversation = conversationRepository.findById(simpleConversationDTO.getId())
+				.orElseThrow(() -> new InternalError("In db doesn't exist a conversation with id: "
+		+ simpleConversationDTO.getId()));
+		conversation.getConversationsInfo().stream().filter(convInfo -> convInfo.getUserId().equals(user.getId()))
+		.findAny().orElseThrow(() -> new InternalError("User that want to change name isn't into conversation"))
+		.setName(simpleConversationDTO.getName());
+		conversationRepository.save(conversation);
 	}
 }
