@@ -82,4 +82,22 @@ public class GroupController {
 				.content(group.toGroupDTO()).build());
 	}
 	
+	@MessageMapping("/groups/change-name")
+	public void updateGroup(SimpleGroupDTO simpleGroupDTO, SimpMessageHeaderAccessor  headerAccessor) {
+		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
+		Group group = groupService.getGroupById(simpleGroupDTO.getId());
+		User userThatUpdateGroup = userService.getUserBySessionId(sessionId);
+		if (!group.getChat().getUsers().stream()
+				.anyMatch(usr -> usr.getId().equals(userThatUpdateGroup.getId()))) {
+			throw new InternalError("User that try to change name for group isn't into group!");
+		}
+		group.setName(simpleGroupDTO.getName());
+		groupService.save(group);
+		WebsocketMessage websocketMessage = WebsocketMessage.builder()
+				.messageType(MessageType.UPDATE_GROUP_NAME).content(group.toSimpleGroupDTO()).build();
+		userUtilCommun.sendToUsers(websocketMessage, group.getChat().getUsers().stream()
+				.filter(usr -> !usr.getSessionId().equals(sessionId)).map(usr -> usr.getSessionId())
+				.collect(Collectors.toList()));
+	}
+	
 }
