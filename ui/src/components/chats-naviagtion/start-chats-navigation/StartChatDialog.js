@@ -5,8 +5,10 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Button, InputAdornment, OutlinedInput, Typography } from "@mui/material";
+import { Button, InputAdornment, OutlinedInput, Typography, Box, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 import UsersListCheck from "./UsersListCheck";
 
@@ -17,13 +19,15 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 
 import { serverHost, GROUP, CONVERSATION } from "../../../app/constants";
-import { nanoid } from "@reduxjs/toolkit";
 
 export default function StartChatDialog(props) {
   const [lookupText, setLookupText] = React.useState("");
   const [checked, setChecked] = React.useState([]);
   const [users, setUsers] = React.useState([]);
   const [renderedUsers, setRenderedUsers] = React.useState([]);
+  const [openGroupDetails, setOpenGroupDetails] = React.useState(false);
+  const [groupName, setGroupName] = React.useState("");
+
   const sessionId = useSelector((state) => state.profile.sessionId);
 
   const dispatch = useDispatch();
@@ -87,7 +91,6 @@ export default function StartChatDialog(props) {
         type = CONVERSATION;
         path += `/conversations/create/${sessionId}/${checked[0]}`;
         chatName = users.find((user) => user.id === checked[0]).name;
-        console.log(chatName);
         break;
       case "group":
         type = GROUP;
@@ -97,7 +100,7 @@ export default function StartChatDialog(props) {
           .map((user) => {
             return { id: user.id };
           });
-        chatName = nanoid(20);
+        chatName = groupName;
         break;
       default:
         console.log(props.option.value);
@@ -116,6 +119,8 @@ export default function StartChatDialog(props) {
     }
   };
 
+  const handleStart = () => (props.option.value === "group" ? setOpenGroupDetails(true) : startChat());
+
   const handleClose = () => {
     props.open.setter(false);
     props.option.setter(null);
@@ -123,66 +128,160 @@ export default function StartChatDialog(props) {
     setUsers([]);
   };
 
-  const handleStart = () => {
+  // Group details dialog functions
+  const handleCloseGroupDetails = () => {
+    setOpenGroupDetails(false);
     startChat();
+    setChecked([]);
+    setGroupName("");
   };
 
+  const handleGroupNameChange = (event) => setGroupName(event.target.value);
+
   return (
-    <Dialog open={props.open.value} onClose={handleClose}>
-      <DialogTitle> Start a chat </DialogTitle>
+    <div style={{ overflowY: "hidden", height: "min-content" }}>
+      <Dialog
+        open={props.open.value}
+        onClose={handleClose}
+        id="start-chat-dialog"
+        sx={{ overflowY: "hidden", height: "100%" }}
+      >
+        <DialogTitle> Start a chat </DialogTitle>
 
-      <DialogContent>
-        <DialogContentText>Choose an user to start a conversation.</DialogContentText>
-        <div id="users-dialog" style={{ height: "60vh", width: "30vw" }}>
-          <div id="top-divider">
-            <hr style={{ width: "98%" }} />
-          </div>
+        <DialogContent id="start-chat-dialog-context" sx={{ overflow: "hidden", height: "100%" }}>
+          <DialogContentText>
+            {props.option.value === "group"
+              ? "Choose some users with which to start a group."
+              : "Choose a user with which to start a conversation."}
+          </DialogContentText>
+          <Box
+            id="users-dialog"
+            sx={{
+              boxSizing: "border-box",
+              width: "30vw",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Box
+              id="look-up-area"
+              sx={{
+                flexBasis: "10%",
+                boxSizing: "border-box",
+              }}
+            >
+              <div id="top-divider">
+                <hr style={{ width: "98%" }} />
+              </div>
 
-          <div
-            id="llok-up"
-            style={{
-              height: "10%",
+              <Box
+                id="look-up"
+                sx={{
+                  height: "min-content",
+                  padding: "0%",
+                  width: "100%",
+                  display: "flex",
+                  boxSizing: "border-box",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Typography sx={{ flexBasis: "7%", marginRight: "1%", marginLeft: "0" }}> Lookup users: </Typography>
+                <OutlinedInput
+                  margin="dense"
+                  id="lookup-input-with-icon-adornment"
+                  type="text"
+                  sx={{
+                    flexBasis: "90",
+                    margin: "1%",
+                    borderRadius: "50px",
+                  }}
+                  value={lookupText}
+                  variant="outlined"
+                  onChange={handleLookup}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <SearchIcon fontSize="medium" />
+                    </InputAdornment>
+                  }
+                />
+                <IconButton onClick={getUsersList} sx={{ flexBasis: "3%" }}>
+                  <AutorenewIcon fontSize="medmium" />
+                </IconButton>
+              </Box>
+
+              <div id="bottom-divider">
+                <hr style={{ width: "98%" }} />
+              </div>
+            </Box>
+
+            <Box
+              id="users-list"
+              sx={{
+                width: "100%",
+                flexBasis: "90%",
+                justifyContent: "center",
+                alignItems: "center",
+                overflowY: "auto",
+              }}
+            >
+              <UsersListCheck users={renderedUsers} checked={checked} handleToggle={handleToggle} />
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleClose}>Ok</Button>
+          <Button onClick={handleStart}>Start</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog id="group-name-dialog" open={openGroupDetails} onClose={handleCloseGroupDetails}>
+        <DialogTitle> Details </DialogTitle>
+
+        <DialogContent id="group-name-dialog-context">
+          <DialogContentText>Choose the group name and profile picture.</DialogContentText>
+          <Box
+            id="group-name"
+            sx={{
+              height: "min-content",
+              padding: "0%",
               width: "100%",
               display: "flex",
+              boxSizing: "border-box",
+              flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <Typography sx={{ flexBasis: "10", marginRight: "1%", marginLeft: "0" }}> Lookup users: </Typography>
+            <Typography sx={{ flexBasis: "10", marginRight: "1%", marginLeft: "0" }}> Group name: </Typography>
             <OutlinedInput
               margin="dense"
-              id="lookup-input-with-icon-adornment"
+              id="group-name-input-with-icon-adornment"
               type="text"
               sx={{
                 flexBasis: "90",
                 margin: "1%",
                 borderRadius: "50px",
               }}
-              value={lookupText}
+              value={groupName}
               variant="outlined"
-              onChange={handleLookup}
+              onChange={handleGroupNameChange}
               endAdornment={
                 <InputAdornment position="end">
-                  <SearchIcon fontSize="medium" />
+                  <SupervisedUserCircleIcon fontSize="small" />
                 </InputAdornment>
               }
             />
-          </div>
+          </Box>
+        </DialogContent>
 
-          <div id="bottom-divider">
-            <hr style={{ width: "98%" }} />
-          </div>
-
-          <div id="users-list" style={{ justifyContent: "center", alignItems: "center" }}>
-            <UsersListCheck users={renderedUsers} checked={checked} handleToggle={handleToggle} />
-          </div>
-        </div>
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={handleClose}>Ok</Button>
-        <Button onClick={handleStart}>Start</Button>
-      </DialogActions>
-    </Dialog>
+        <DialogActions>
+          <Button onClick={handleCloseGroupDetails}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 }

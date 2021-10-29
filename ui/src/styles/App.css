@@ -38,3 +38,8 @@
   border-width: 2px;
   border-top-style: hidden;
 }
+
+#start-chat-dialog div[role="dialog"] {
+  height: 90%;
+  overflow: hidden;
+}

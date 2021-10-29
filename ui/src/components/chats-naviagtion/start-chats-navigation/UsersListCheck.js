@@ -9,13 +9,20 @@ import Checkbox from "@mui/material/Checkbox";
 
 export default function UsersListCheck(props) {
   return (
-    <List sx={{ width: "100%", maxWidth: "100%", bgcolor: "background.paper" }}>
+    <List
+      sx={{
+        width: "100%",
+        maxWidth: "100%",
+        bgcolor: "background.paper",
+      }}
+    >
       {props.users.map((user, index) => {
         const labelId = `checkbox-list-label-${index}`;
 
         return (
           <ListItem
             key={user.id}
+            sx={{ width: "100%" }}
             // secondaryAction={
             //   <IconButton edge="end" aria-label="comments">
             //     <CommentIcon />
