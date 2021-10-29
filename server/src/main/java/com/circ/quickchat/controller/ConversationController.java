@@ -12,6 +12,7 @@ import constant.MessageType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.*;
 
 import com.circ.quickchat.entity.Chat;
@@ -22,7 +23,6 @@ import com.circ.quickchat.entity.User;
 import com.circ.quickchat.service.ConversationService;
 import com.circ.quickchat.service.UserService;
 
-import DTO.ConversationDTO;
 import DTO.SimpleConversationDTO;
 
 import javax.transaction.Transactional;
@@ -70,6 +70,12 @@ public class ConversationController {
 		userService.save(currentUser);
 		userUtilCommun.sendToUser(sessionId, WebsocketMessage.builder().messageType(MessageType.REQUESTED_CHAT)
 				.content(conversation.toConversationDTO(currentUser.getId())).build());
+	}
+	
+	@MessageMapping("/conversations/change-name")
+	public void updateConversation(SimpleConversationDTO simpleConversationDTO, SimpMessageHeaderAccessor headerAccessor) {
+		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
+		conversationService.updateConversationForUser(sessionId, simpleConversationDTO);
 	}
 	
 }
