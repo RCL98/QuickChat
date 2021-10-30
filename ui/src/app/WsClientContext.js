@@ -9,7 +9,7 @@ import {
   usernameUpdated,
   currentyWritingUpdated,
 } from "../reducers/usersSlice";
-import { chatAdded } from "../reducers/chatsSlice";
+import { chatAdded, chatUpdated } from "../reducers/chatsSlice";
 import { currentChatChanged, sessionIdChanged, userIdChanged } from "../reducers/profileSlice";
 
 import * as constants from "./constants";
@@ -63,6 +63,10 @@ const messageFilter = (message) => {
 
         case constants.UPDATE_WHO_IS_WRITING:
           store.dispatch(currentyWritingUpdated(generalMessage.content));
+          break;
+
+        case constants.UPDATE_GROUP_NAME:
+          store.dispatch(chatUpdated(generalMessage.content));
           break;
 
         default:

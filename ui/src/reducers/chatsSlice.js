@@ -15,7 +15,7 @@ const chatsSlice = createSlice({
       });
     },
     chatUpdated(state, action) {
-      return state.map((obj) => (obj.id === action.payload.id ? { ...obj, usersSize: action.payload.newSize } : obj));
+      return state.map((obj) => (obj.id === action.payload.id ? { ...obj, name: action.payload.name } : obj));
     },
   },
 });

@@ -73,7 +73,6 @@ export default function StartChatDialog(props) {
       })
       .then(function (response) {
         const chatId = response.data.id;
-        console.log(chatId);
         dispatch(chatAdded({ id: chatId, name: name, type: type }));
       })
       .catch(function (error) {

@@ -4,10 +4,9 @@ import IconButton from "@mui/material/IconButton";
 import { SendSharp } from "@mui/icons-material";
 import { InputAdornment, OutlinedInput } from "@mui/material";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { nanoid } from "@reduxjs/toolkit";
 import { messageAdded } from "../../reducers/messagesSlice";
-import { useSelector } from "react-redux";
 
 import { WsClientContext } from "../../app/WsClientContext";
 

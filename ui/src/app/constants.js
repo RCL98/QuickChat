@@ -3,6 +3,7 @@ export const MESSAGE = "MESSAGE";
 export const UPDATE_CHAT_USER = "UPDATE_CHAT_USER";
 export const ADD_USER_CHAT = "ADD_USER_CHAT";
 export const DELETE_USER_CHAT = "DELETE_USER_CHAT";
+export const UPDATE_GROUP_NAME = "UPDATE_GROUP_NAME";
 export const NEW_CHAT = "NEW_CHAT";
 export const REQUESTED_CHAT = "REQUESTED_CHAT";
 export const UPDATE_WHO_IS_WRITING = "UPDATE_WHO_IS_WRITING";
