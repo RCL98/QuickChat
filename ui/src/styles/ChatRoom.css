@@ -6,12 +6,14 @@
   display: flex;
   flex-direction: column;
   padding: 0;
+  margin: 0;
 }
 
 .ChatAppBar {
   box-sizing: border-box;
   display: block;
   width: auto;
+  background-color: darkcyan;
   min-height: min-content;
   overflow-x: hidden;
   overflow-y: hidden;
@@ -36,6 +38,7 @@
 
 .NewMessageBox {
   box-sizing: border-box;
+  background-color: darkcyan;
   display: flex;
   padding: 1%;
   border-top-style: groove;

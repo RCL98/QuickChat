@@ -3,9 +3,12 @@ import * as React from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
+import Avatar from "@mui/material/Avatar";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 export default function UsersListCheck(props) {
   return (
@@ -20,16 +23,7 @@ export default function UsersListCheck(props) {
         const labelId = `checkbox-list-label-${index}`;
 
         return (
-          <ListItem
-            key={user.id}
-            sx={{ width: "100%" }}
-            // secondaryAction={
-            //   <IconButton edge="end" aria-label="comments">
-            //     <CommentIcon />
-            //   </IconButton>
-            // }
-            disablePadding
-          >
+          <ListItem key={user.id} sx={{ width: "100%" }} disablePadding>
             <ListItemButton role={undefined} onClick={props.handleToggle(user.id)} dense>
               <ListItemIcon>
                 <Checkbox
@@ -40,6 +34,11 @@ export default function UsersListCheck(props) {
                   inputProps={{ "aria-labelledby": labelId }}
                 />
               </ListItemIcon>
+              <ListItemAvatar>
+                <Avatar alt="User Profile Pic">
+                  <AccountCircleIcon />
+                </Avatar>
+              </ListItemAvatar>
               <ListItemText id={labelId} primary={user.name} />
             </ListItemButton>
           </ListItem>

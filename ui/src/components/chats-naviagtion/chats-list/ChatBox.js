@@ -1,13 +1,25 @@
 import React from "react";
 
 import Menu from "@mui/material/Menu";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import Avatar from "@mui/material/Avatar";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import GroupsIcon from "@mui/icons-material/Groups";
 
+import { useSelector } from "react-redux";
+
+import { WsClientContext } from "../../../app/WsClientContext";
 import { CONVERSATION } from "../../../app/constants";
 
-export default function ChatBox(props) {
+export default function ChatBoxItem(props) {
   const [contextMenu, setContextMenu] = React.useState(null);
+  const sessionId = useSelector((state) => state.profile.sessionId);
+  const wsClient = React.useContext(WsClientContext);
 
   const handleContextMenu = (event) => {
     console.log(event.target);
@@ -34,21 +46,35 @@ export default function ChatBox(props) {
     props.dialog.setter(true);
   };
 
+  const handleClickedItem = async (chatId, type) => {
+    console.log(chatId, type);
+    if (type === CONVERSATION) wsClient.send(`/conversations/get/${chatId}/user/${sessionId}`, {}, {});
+    else wsClient.send(`/groups/get/${chatId}/user/${sessionId}`, {}, {});
+  };
+
   return (
-    <div onContextMenu={handleContextMenu}>
-      <Typography variant="h5"> {props.chat.name} </Typography>
-      <Menu
-        open={contextMenu !== null}
-        onClose={handleCloseMenu}
-        anchorReference="anchorPosition"
-        anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
-      >
-        <MenuItem onClick={handleMenuChangeChatName}>
-          {props.chat.type === CONVERSATION
-            ? `Change conversation's ${props.chat.name}`
-            : `Change group's ${props.chat.name}`}
-        </MenuItem>
-      </Menu>
-    </div>
+    <ListItem disablePadding onContextMenu={handleContextMenu}>
+      <ListItemButton role={undefined} dense onClick={() => handleClickedItem(props.chat.id, props.chat.type)}>
+        <ListItemAvatar>
+          <Avatar alt="User Profile Pic">
+            {props.chat.type === CONVERSATION ? <AccountCircleIcon /> : <GroupsIcon />}
+          </Avatar>
+        </ListItemAvatar>
+        <ListItemText id={props.labelId} primary={<Typography variant="h5"> {props.chat.name} </Typography>} />
+
+        <Menu
+          open={contextMenu !== null}
+          onClose={handleCloseMenu}
+          anchorReference="anchorPosition"
+          anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+        >
+          <MenuItem onClick={handleMenuChangeChatName}>
+            {props.chat.type === CONVERSATION
+              ? `Change conversation's ${props.chat.name}`
+              : `Change group's ${props.chat.name}`}
+          </MenuItem>
+        </Menu>
+      </ListItemButton>
+    </ListItem>
   );
 }

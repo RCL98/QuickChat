@@ -3,7 +3,12 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Avatar from "@mui/material/Avatar";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import GroupsIcon from "@mui/icons-material/Groups";
+
+import { CONVERSATION } from "../../app/constants";
 
 export default function ChatAppBar() {
   const users = useSelector((state) => state.users);
@@ -12,11 +17,25 @@ export default function ChatAppBar() {
   if (chat === undefined) chat = { name: "You" };
 
   return (
-    <Box sx={{ backgroundColor: "info.main", margin: 0, height: "100%" }}>
-      <Typography variant="h5">{chat.name}</Typography>
-      <Typography variant="body1">
-        {users.map((user) => (user.isWriting ? `${user.name} is typing` : user.name)).join(", ")}
-      </Typography>
-    </Box>
+    <Stack
+      direction="row"
+      spacing={2}
+      sx={{
+        // backgroundColor: "info.main",
+        margin: 0,
+        height: "100%",
+        justifyContent: "left",
+        alignItems: "center",
+        paddingLeft: "2%",
+      }}
+    >
+      <Avatar alt="Profile Pic">{chat.type === CONVERSATION ? <AccountCircleIcon /> : <GroupsIcon />}</Avatar>
+      <Stack direction="column">
+        <Typography variant="h5">{chat.name}</Typography>
+        <Typography variant="body1">
+          {users.map((user) => (user.isWriting ? `${user.name} is typing` : user.name)).join(", ")}
+        </Typography>
+      </Stack>
+    </Stack>
   );
 }

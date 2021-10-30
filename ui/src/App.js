@@ -33,6 +33,11 @@ export default function App() {
               body: mode === "dark" ? darkScrollbar() : null,
             },
           },
+          MuiAppBar: {
+            defaultProps: {
+              enableColorOnDark: true,
+            },
+          },
         },
       }),
     [mode]

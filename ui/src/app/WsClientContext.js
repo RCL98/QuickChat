@@ -34,13 +34,7 @@ const messageFilter = (message) => {
           break;
 
         case constants.NEW_CHAT:
-          store.dispatch(
-            chatAdded({
-              id: generalMessage.content.id,
-              name: generalMessage.content.name,
-              type: generalMessage.content.type,
-            })
-          );
+          store.dispatch(chatAdded(generalMessage.content));
           break;
 
         case constants.REQUESTED_CHAT:

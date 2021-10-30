@@ -1,9 +1,6 @@
 import React from "react";
 
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -18,16 +15,15 @@ import { chatUpdated } from "../../../reducers/chatsSlice";
 
 import { WsClientContext } from "../../../app/WsClientContext";
 import { CONVERSATION } from "../../../app/constants";
-import ChatBox from "./ChatBox";
+import ChatBoxItem from "./ChatBox";
 
 export default function ChatsList(props) {
   const [openDialog, setOpenDialog] = React.useState(false);
   const [chatName, setChatName] = React.useState("");
   const [chosenChat, setChosenChat] = React.useState(null);
+  const wsClient = React.useContext(WsClientContext);
 
   const chats = useSelector((state) => state.chats);
-  const sessionId = useSelector((state) => state.profile.sessionId);
-  const wsClient = React.useContext(WsClientContext);
 
   const dispatch = useDispatch();
 
@@ -49,12 +45,6 @@ export default function ChatsList(props) {
     dispatch(chatUpdated(updatedChat));
   };
 
-  const handleClickedItem = async (chatId, type) => {
-    console.log(chatId, type);
-    if (type === CONVERSATION) wsClient.send(`/conversations/get/${chatId}/user/${sessionId}`, {}, {});
-    else wsClient.send(`/groups/get/${chatId}/user/${sessionId}`, {}, {});
-  };
-
   const renderChatsList = () => {
     let renderedChats = chats;
     if (props.filterText !== "") {
@@ -67,21 +57,14 @@ export default function ChatsList(props) {
           {renderedChats.map((chat, index) => {
             const labelId = `chat-list-label-${index}`;
             return (
-              <ListItem key={chat.id} disablePadding>
-                <ListItemButton role={undefined} onClick={() => handleClickedItem(chat.id, chat.type)} dense>
-                  <ListItemText
-                    id={labelId}
-                    primary={
-                      <ChatBox
-                        chat={chat}
-                        dialog={{ value: openDialog, setter: setOpenDialog }}
-                        setChosenChat={setChosenChat}
-                        setChatName={setChatName}
-                      />
-                    }
-                  />
-                </ListItemButton>
-              </ListItem>
+              <ChatBoxItem
+                key={chat.id}
+                chat={chat}
+                labelId={labelId}
+                dialog={{ value: openDialog, setter: setOpenDialog }}
+                setChosenChat={setChosenChat}
+                setChatName={setChatName}
+              />
             );
           })}
         </List>
