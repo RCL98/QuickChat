@@ -15,7 +15,9 @@ import { chatUpdated } from "../../../reducers/chatsSlice";
 
 import { WsClientContext } from "../../../app/WsClientContext";
 import { CONVERSATION } from "../../../app/constants";
+
 import ChatBoxItem from "./ChatBox";
+import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
 
 export default function ChatsList(props) {
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -69,8 +71,15 @@ export default function ChatsList(props) {
           })}
         </List>
 
-        <Dialog id="change-chat-name-dialog" open={openDialog} onClose={handleDialogClose}>
-          <DialogTitle> Details </DialogTitle>
+        <Dialog
+          id="change-chat-name-dialog"
+          open={openDialog}
+          onClose={handleDialogClose}
+          PaperComponent={DraggablePaperComponent}
+        >
+          <DialogTitle style={{ cursor: "move" }} id="draggable-chat-details-dialog-title">
+            Details
+          </DialogTitle>
 
           <DialogContent id="group-name-dialog-context">
             <DialogContentText>Choose the chat name</DialogContentText>
