@@ -35,7 +35,7 @@ public class User {
 	@Column(name = "created_at")
 	private Timestamp createdAt;
 	
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "photo_profile_id")
 	private Photo photo;
 	

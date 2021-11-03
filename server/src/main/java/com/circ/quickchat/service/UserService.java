@@ -1,5 +1,6 @@
 package com.circ.quickchat.service;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.circ.quickchat.entity.Group;
+import com.circ.quickchat.entity.Photo;
 import com.circ.quickchat.entity.User;
 import com.circ.quickchat.repositories.UserRepository;
 import com.circ.quickchat.utils.Alerts.ChatAllert;
@@ -52,7 +54,8 @@ public class UserService {
 
 	public User getUserBySessionId(String sessionId) {
 		return userRepository.findOneBySessionId(sessionId)
-				.orElseThrow(() -> new InternalError("User that create the chat isn't " + "into database"));
+				.orElseThrow(() -> new InternalError("User with sessionId: " +
+		sessionId + " doesn't exist into db"));
 	}
 
 	public User save(User user) {
@@ -61,7 +64,13 @@ public class UserService {
 
 	public void deleteUser(User user) {
 		chaConversationInfoService.deleteAll(chaConversationInfoService.findAllByUserId(user.getId()));
+		Photo photo = user.getPhoto();
+		if (photo != null) {
+			File deleteFile = new File(photo.getBigPhotoUri());
+			deleteFile.delete();
+		}
 		userRepository.deleteById(user.getId());
+		
 	}
 
 	public List<UserDTO> getUsers(String sessionId) {
