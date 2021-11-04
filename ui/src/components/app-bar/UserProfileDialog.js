@@ -16,20 +16,22 @@ import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 
 import DraggablePaperComponent from "../../app/DraggablePaperComponent";
 
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { usernameChanged } from "../../reducers/profileSlice";
 
 import { WsClientContext } from "../../app/WsClientContext";
-import CropIamgeDialog from "./CropImageDialog";
+
+import AlertDialog from "../../app/AlertDialog";
+import PrepareAvatarDialog from "./PrepareAvatarDialog";
 
 export default function UserProfileDialog(props) {
   const username = useSelector((state) => state.profile.username);
   const wsClient = React.useContext(WsClientContext);
   const [auxUsername, setAuxUsername] = React.useState(username);
-  const [photoPath, setPhotoPath] = React.useState("/mario-av.png");
-  const [cropPhoto, setCropPhoto] = React.useState(null);
+  const [avatarPath, setAvatarPath] = React.useState(null);
+  const [uploadPhoto, setUploadPhoto] = React.useState(null);
   const [openCropPhotoDialog, setOpenCropPhotoDialog] = React.useState(false);
+  const [alertOpen, setAlertOpen] = React.useState(false);
 
   const dispatch = useDispatch();
 
@@ -51,13 +53,25 @@ export default function UserProfileDialog(props) {
 
   const handlePhotoUpload = (event) => {
     if (event.target.files && event.target.files.length > 0) {
+      const fileSize = event.target.files[0].size / 1024 / 1024;
       const reader = new FileReader();
       reader.addEventListener("load", () => {
-        setCropPhoto(reader.result);
-        setOpenCropPhotoDialog(true);
+        let img = new Image();
+        img.src = reader.result;
+        img.onload = function () {
+          var height = img.height;
+          var width = img.width;
+          console.log(height, width);
+          if (height < 300 && width < 300) {
+            if (fileSize > 0.5) setAlertOpen(true);
+            else setAvatarPath(reader.result);
+          } else {
+            setUploadPhoto(reader.result);
+            setOpenCropPhotoDialog(true);
+          }
+        };
       });
       reader.readAsDataURL(event.target.files[0]);
-      // setPhotoPath(URL.createObjectURL(event.target.files[0]));
     }
     event.target.value = null;
   };
@@ -108,13 +122,13 @@ export default function UserProfileDialog(props) {
                 alignItems: "center",
               }}
             >
-              <Avatar id="user-profile-pic" alt="Profile Pic" src={photoPath} sx={{ width: "40%", height: "50%" }}>
+              <Avatar id="user-profile-pic" alt="Profile Pic" src={avatarPath} sx={{ width: "50%", height: "50%" }}>
                 <AccountCircleIcon />
               </Avatar>
-              <label htmlFor="user-photo-upload">
+              <label htmlFor="avatar-photo-upload">
                 <Input
                   accept="image/*"
-                  id="user-photo-upload"
+                  id="avatar-photo-upload"
                   type="file"
                   sx={{ display: "none" }}
                   onChange={handlePhotoUpload}
@@ -132,8 +146,15 @@ export default function UserProfileDialog(props) {
           <Button onClick={handleAccept}>Accept</Button>
         </DialogActions>
       </Dialog>
-      <CropIamgeDialog
-        photo={{ value: cropPhoto, setter: setCropPhoto }}
+      <AlertDialog
+        open={alertOpen}
+        setOpen={setAlertOpen}
+        content={"Upload file must not be bigger than 500 Kb."}
+        title={"File to big"}
+      />
+      <PrepareAvatarDialog
+        setAvatarPath={setAvatarPath}
+        uploadedPhoto={{ value: uploadPhoto, setter: setUploadPhoto }}
         open={{ value: openCropPhotoDialog, setter: setOpenCropPhotoDialog }}
       />
     </div>
