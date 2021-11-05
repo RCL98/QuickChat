@@ -13,8 +13,8 @@
 /ui/.pnp.js
 
 #photos
-/server/photoDir/*
-/server/photoDir
+/photoDir/*
+/photoDir
 
 # testing
 /ui/coverage
