@@ -17,17 +17,20 @@ import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import DraggablePaperComponent from "../../app/DraggablePaperComponent";
 
 import { useSelector, useDispatch } from "react-redux";
-import { usernameChanged } from "../../reducers/profileSlice";
+import { avatarChanged, usernameChanged } from "../../reducers/profileSlice";
 
 import { WsClientContext } from "../../app/WsClientContext";
 
 import AlertDialog from "../../app/AlertDialog";
 import PrepareAvatarDialog from "./PrepareAvatarDialog";
 
+import axios from "axios";
+import { serverHost } from "../../app/constants";
+
 export default function UserProfileDialog(props) {
-  const username = useSelector((state) => state.profile.username);
+  const profile = useSelector((state) => state.profile);
   const wsClient = React.useContext(WsClientContext);
-  const [auxUsername, setAuxUsername] = React.useState(username);
+  const [auxUsername, setAuxUsername] = React.useState(profile.username);
   const [avatarPath, setAvatarPath] = React.useState(null);
   const [uploadPhoto, setUploadPhoto] = React.useState(null);
   const [openCropPhotoDialog, setOpenCropPhotoDialog] = React.useState(false);
@@ -48,23 +51,37 @@ export default function UserProfileDialog(props) {
 
   const handleAccept = () => {
     dispatch(usernameChanged(auxUsername));
+    dispatch(avatarChanged(avatarPath));
     wsClient.send("/user/change/name", {}, auxUsername);
+    props.setOpen(false);
   };
 
   const handlePhotoUpload = (event) => {
     if (event.target.files && event.target.files.length > 0) {
       const fileSize = event.target.files[0].size / 1024 / 1024;
       const reader = new FileReader();
+      let formData = new FormData();
+      formData.append("file", event.target.files[0], event.target.files[0].name);
+      formData.append("userSessionId", profile.sessionId);
       reader.addEventListener("load", () => {
         let img = new Image();
         img.src = reader.result;
         img.onload = function () {
-          var height = img.height;
-          var width = img.width;
-          console.log(height, width);
-          if (height < 300 && width < 300) {
+          if (img.height < 300 && img.width < 300) {
             if (fileSize > 0.5) setAlertOpen(true);
-            else setAvatarPath(reader.result);
+            else {
+              axios
+                .post(serverHost + "/photos/upload", formData, {
+                  headers: {
+                    "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
+                  },
+                })
+                .then(function (response) {
+                  console.log(response);
+                })
+                .catch((error) => console.error(error));
+              setAvatarPath(reader.result);
+            }
           } else {
             setUploadPhoto(reader.result);
             setOpenCropPhotoDialog(true);

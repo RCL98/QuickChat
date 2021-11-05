@@ -11,6 +11,11 @@ import Avatar from "@mui/material/Avatar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 export default function UsersListCheck(props) {
+  // React.useEffect(() => {
+  //   console.log("avatarrrrrrrrrr");
+  //   console.log(props.users[0].avatar);
+  // }, []);
+
   return (
     <List
       sx={{
@@ -35,7 +40,7 @@ export default function UsersListCheck(props) {
                 />
               </ListItemIcon>
               <ListItemAvatar>
-                <Avatar alt="User Profile Pic">
+                <Avatar alt="User Profile Pic" src={user.avatar}>
                   <AccountCircleIcon />
                 </Avatar>
               </ListItemAvatar>

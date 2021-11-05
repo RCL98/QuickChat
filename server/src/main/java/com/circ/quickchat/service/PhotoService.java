@@ -37,7 +37,7 @@ public class PhotoService {
 	private UserService userService;
 	
 	@PostConstruct
-	public void initDirectoryPhtotos() {
+	public void initDirectoryPhotos() {
 		File directoryPhotosFile = new File(photoDirectoryPath);
 		if (!directoryPhotosFile.exists()) {
 			directoryPhotosFile.mkdir();

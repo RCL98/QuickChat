@@ -16,13 +16,20 @@ import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 
 import AvatarEditor from "react-avatar-editor";
 
+import { useSelector } from "react-redux";
+
 import "../../styles/PrepareAvatarDialog.css";
+
+import axios from "axios";
+import { serverHost } from "../../app/constants";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 export default function PrepareAvatarDialog(props) {
+  const sessionId = useSelector((state) => state.profile.sessionId);
+
   const [zoom, setZoom] = React.useState(1);
   const [rotation, setRotation] = React.useState(0);
   const [imageSrc, setImageSrc] = React.useState(props.uploadedPhoto.value);
@@ -58,7 +65,21 @@ export default function PrepareAvatarDialog(props) {
     setCroppedImage(null);
   };
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
+    let formData = new FormData();
+    const blob = await (await fetch(croppedImage)).blob();
+    formData.append("file", blob);
+    formData.append("userSessionId", sessionId);
+    axios
+      .post(serverHost + "/photos/upload", formData, {
+        headers: {
+          "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
+        },
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch((error) => console.error(error));
     props.setAvatarPath(croppedImage);
     handleClose();
   };

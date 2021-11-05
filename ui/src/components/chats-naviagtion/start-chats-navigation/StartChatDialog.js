@@ -21,6 +21,23 @@ import axios from "axios";
 
 import { serverHost, GROUP, CONVERSATION } from "../../../app/constants";
 
+// await fetch(serverHost + `/photos/get/${users[i].id}`, {
+//   method: "GET",
+// })
+//   .then((data) => {
+//     console.log(data);
+//     return data.blob();
+//   })
+//   .then((data) => {
+//     var reader = new FileReader();
+//     reader.onload = function () {
+//       users[i].avatar = reader.result;
+//       // console.log("This is base64", reader.result);
+//     };
+//     reader.readAsDataURL(data);
+//   })
+//   .catch((error) => console.error(error));
+
 export default function StartChatDialog(props) {
   const [lookupText, setLookupText] = React.useState("");
   const [checked, setChecked] = React.useState([]);
@@ -33,14 +50,27 @@ export default function StartChatDialog(props) {
 
   const dispatch = useDispatch();
 
+  const getUsersAvatars = async (users) => {
+    for (let i = 0; i < users.length; i++) {
+      await axios
+        .get(serverHost + `/photos/get/${users[i].id}`, {
+          responseType: "arraybuffer",
+        })
+        .then((response) => {
+          users[i].avatar = "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64");
+        })
+        .catch((error) => console.error(error));
+    }
+    setUsers(users);
+    setRenderedUsers(users);
+  };
+
   const getUsersList = () => {
     if (props.open.value) {
       axios
         .get(serverHost + `/users/${sessionId}`)
         .then(function (response) {
-          console.log(response.data);
-          setUsers(response.data);
-          setRenderedUsers(response.data);
+          getUsersAvatars(response.data);
         })
         .catch(function (error) {
           console.error(error);

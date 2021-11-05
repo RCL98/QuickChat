@@ -38,7 +38,7 @@ export default function MyAppBar(props) {
 
   const theme = useTheme();
 
-  const username = useSelector((state) => state.profile.username);
+  const profile = useSelector((state) => state.profile);
 
   const lightingMode = () => {
     props.lightingMode();
@@ -55,8 +55,8 @@ export default function MyAppBar(props) {
           <Grid container sx={{ height: "100%" }}>
             <Grid item xs></Grid>
             <Grid item xs={3} id="profile" className={classes.profile}>
-              <Typography variant="h6"> {`Your name: ${username}`} </Typography>
-              <Avatar alt="Profile Pic">
+              <Typography variant="h6"> {`Your name: ${profile.username}`} </Typography>
+              <Avatar alt="Profile Pic" src={profile.avatar}>
                 <AccountCircleIcon />
               </Avatar>
             </Grid>
