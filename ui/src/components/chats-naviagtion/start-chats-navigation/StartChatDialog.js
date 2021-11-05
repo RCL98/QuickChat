@@ -11,6 +11,7 @@ import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 import UsersListCheck from "./UsersListCheck";
+import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
 
 import { chatAdded } from "../../../reducers/chatsSlice";
 import { useSelector } from "react-redux";
@@ -143,9 +144,12 @@ export default function StartChatDialog(props) {
         open={props.open.value}
         onClose={handleClose}
         id="start-chat-dialog"
+        PaperComponent={DraggablePaperComponent}
         sx={{ overflowY: "hidden", height: "100%" }}
       >
-        <DialogTitle> Start a chat </DialogTitle>
+        <DialogTitle style={{ cursor: "move" }} id="draggable-start-chat-dialog-title">
+          Start a chat
+        </DialogTitle>
 
         <DialogContent id="start-chat-dialog-context" sx={{ overflow: "hidden", height: "100%" }}>
           <DialogContentText>
