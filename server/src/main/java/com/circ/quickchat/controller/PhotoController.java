@@ -2,6 +2,7 @@ package com.circ.quickchat.controller;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -21,7 +22,7 @@ import com.circ.quickchat.service.PhotoService;
 import DTO.PhotoUploadDTO;
 
 @RestController
-@RequestMapping("/photo")
+@RequestMapping("/photos")
 public class PhotoController {
 	
 	@Autowired
@@ -34,8 +35,8 @@ public class PhotoController {
 				.userSessionId(sessionId).build());
 	}
 	
-	@GetMapping("/getPhoto/{userId}") 
-	public  ResponseEntity<byte []> getUserPhotoProfile(@PathVariable Long userId) throws IOException{
+	@GetMapping("/get/{userId}")
+	public  ResponseEntity<byte[]> getUserPhotoProfile(@PathVariable Long userId) throws IOException{
 		byte[] resource = photoService.getPhotoForUser(userId);
 		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
 	}
