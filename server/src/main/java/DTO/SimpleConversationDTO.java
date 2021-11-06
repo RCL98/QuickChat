@@ -18,4 +18,6 @@ public class SimpleConversationDTO {
 	private ChatTypes type = ChatTypes.CONVERSATION;
 
 	private String name;
+	
+	private Long anotherUserId;
 }

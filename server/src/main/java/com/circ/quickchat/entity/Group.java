@@ -28,7 +28,7 @@ public class Group {
 	private Long id;
 	
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "photo_profile_id")
+	@JoinColumn(name = "group_photo_id")
 	private Photo photo;
 	
 	@OneToOne(fetch = FetchType.EAGER, cascade =  CascadeType.ALL)

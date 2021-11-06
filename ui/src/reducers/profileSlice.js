@@ -5,6 +5,7 @@ const initialState = {
   userId: null,
   currentChat: null,
   sessionId: null,
+  avatar: null,
 };
 
 const profileSlice = createSlice({
@@ -23,9 +24,13 @@ const profileSlice = createSlice({
     sessionIdChanged(state, action) {
       return { ...state, sessionId: action.payload };
     },
+    avatarChanged(state, action) {
+      return { ...state, avatar: action.payload };
+    },
   },
 });
 
-export const { usernameChanged, userIdChanged, currentChatChanged, sessionIdChanged } = profileSlice.actions;
+export const { usernameChanged, userIdChanged, currentChatChanged, sessionIdChanged, avatarChanged } =
+  profileSlice.actions;
 
 export default profileSlice.reducer;

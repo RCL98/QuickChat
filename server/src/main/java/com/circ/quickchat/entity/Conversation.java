@@ -46,6 +46,10 @@ public class Conversation {
 		ConversationInfo conversationInfoForCurrentUser = conversationsInfo.stream()
 				.filter(convInfo -> convInfo.getUserId().equals(userConvId)).findAny()
 				.orElseThrow(() -> new InternalError("This user isn't into covnersation"));
-		return SimpleConversationDTO.builder().id(id).name(conversationInfoForCurrentUser.getName()).build();
+		Long anotherUserId = conversationsInfo.stream().map(convInfo -> convInfo.getUserId())
+				.filter(userId -> !userId.equals(userConvId)).findAny()
+				.orElseThrow(() -> new InternalError("This conv contain only one user!"));
+		return SimpleConversationDTO.builder().id(id).name(conversationInfoForCurrentUser.getName())
+				.anotherUserId(anotherUserId).build();
 	}
 }

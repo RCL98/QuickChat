@@ -45,7 +45,7 @@ public class PhotoService {
 	@Autowired GroupService groupService;
 	
 	@PostConstruct
-	public void initDirectoryPhtotos() {
+	public void initDirectoryPhotos() {
 		File directoryPhotosFile = new File(photoDirectoryPath);
 		if (!directoryPhotosFile.exists()) {
 			directoryPhotosFile.mkdir();
@@ -88,8 +88,11 @@ public class PhotoService {
 	public byte[] getPhotoForUser(Long userId) throws IOException {
 		User usr = userService.getUserForId(userId);
 		Photo photo = usr.getPhoto();
-		String photoUri = photo.getBigPhotoUri();
-		return getPhotoBytes(photoUri);
+		if (photo != null) {
+			String photoUri = photo.getBigPhotoUri();
+			return getPhotoBytes(photoUri);
+		}
+		return null;
 	}
 	
 	private Photo savePhoto(MultipartFile file) throws IOException {

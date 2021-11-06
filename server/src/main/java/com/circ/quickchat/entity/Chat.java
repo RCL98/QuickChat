@@ -46,10 +46,6 @@ public class Chat {
 	@JoinColumn(name = "chat_id")
 	protected List<Message> messages;
 	
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "photo_profile_id")
-	private Photo photo;
-	
 	public Chat() {
 		
 	}
