@@ -22,4 +22,9 @@ public class ChatService {
 						.anyMatch(usr -> usr.getId().equals(user.getId())))
 				.collect(Collectors.toList());
 	}
+	
+	public Chat findChatById(Long chatId) {
+		return chatRepository.findById(chatId)
+				.orElseThrow(() -> new InternalError("Chat with this id doesn't exist"));
+	}
 }

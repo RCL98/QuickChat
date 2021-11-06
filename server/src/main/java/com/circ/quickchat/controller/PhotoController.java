@@ -40,4 +40,16 @@ public class PhotoController {
 		byte[] resource = photoService.getPhotoForUser(userId);
 		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
 	}
+	
+	@PostMapping("/group/upload")
+	public void uploadPhotoGroup(@RequestParam("file") MultipartFile file,
+			@RequestParam("groupId") Long groupId) throws IOException {
+		photoService.uploadPhotoForGroup(groupId, file);
+	}
+	
+	@GetMapping("/group/{userId}") 
+	public  ResponseEntity<byte []> getGroupProfilePhoto(@PathVariable Long userId) throws IOException{
+		byte[] resource = photoService.getPhotoForGroup(userId);
+		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
+	}
 }
