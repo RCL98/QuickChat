@@ -18,10 +18,10 @@ import AvatarEditor from "react-avatar-editor";
 
 import { useSelector } from "react-redux";
 
-import "../../styles/PrepareAvatarDialog.css";
-
 import axios from "axios";
-import { serverHost } from "../../app/constants";
+import { serverHost } from "./constants";
+
+import "../styles/PrepareAvatarDialog.css";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -70,17 +70,19 @@ export default function PrepareAvatarDialog(props) {
     const newAvatar = croppedImage !== null ? croppedImage : editor.current.getImageScaledToCanvas().toDataURL();
     const blob = await (await fetch(newAvatar)).blob();
     formData.append("file", blob);
-    formData.append("userSessionId", sessionId);
-    axios
-      .post(serverHost + "/photos/upload", formData, {
-        headers: {
-          "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-        },
-      })
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch((error) => console.error(error));
+    if (props.type === "user") {
+      formData.append("userSessionId", sessionId);
+      axios
+        .post(serverHost + "/photos/upload", formData, {
+          headers: {
+            "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
+          },
+        })
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch((error) => console.error(error));
+    }
     props.setAvatarPath(newAvatar);
     handleClose();
   };

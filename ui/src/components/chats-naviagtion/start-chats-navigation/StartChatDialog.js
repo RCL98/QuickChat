@@ -7,10 +7,10 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Button, InputAdornment, OutlinedInput, Typography, Box, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 import UsersListCheck from "./UsersListCheck";
+import GroupDetailsDialog from "./GroupDetailsDialog";
 import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
 
 import { chatAdded } from "../../../reducers/chatsSlice";
@@ -21,23 +21,6 @@ import axios from "axios";
 
 import { serverHost, GROUP, CONVERSATION } from "../../../app/constants";
 
-// await fetch(serverHost + `/photos/get/${users[i].id}`, {
-//   method: "GET",
-// })
-//   .then((data) => {
-//     console.log(data);
-//     return data.blob();
-//   })
-//   .then((data) => {
-//     var reader = new FileReader();
-//     reader.onload = function () {
-//       users[i].avatar = reader.result;
-//       // console.log("This is base64", reader.result);
-//     };
-//     reader.readAsDataURL(data);
-//   })
-//   .catch((error) => console.error(error));
-
 export default function StartChatDialog(props) {
   const [lookupText, setLookupText] = React.useState("");
   const [checked, setChecked] = React.useState([]);
@@ -45,6 +28,7 @@ export default function StartChatDialog(props) {
   const [renderedUsers, setRenderedUsers] = React.useState([]);
   const [openGroupDetails, setOpenGroupDetails] = React.useState(false);
   const [groupName, setGroupName] = React.useState("");
+  const [groupPhoto, setGroupPhoto] = React.useState(null);
 
   const sessionId = useSelector((state) => state.profile.sessionId);
 
@@ -96,7 +80,7 @@ export default function StartChatDialog(props) {
     }
   };
 
-  const makeCreateRequest = (path, name, partners, type) => {
+  const makeCreateRequest = (path, name, partners, type, photo) => {
     axios
       .post(path, {
         name: name,
@@ -104,7 +88,7 @@ export default function StartChatDialog(props) {
       })
       .then(function (response) {
         const chatId = response.data.id;
-        dispatch(chatAdded({ id: chatId, name: name, type: type }));
+        dispatch(chatAdded({ id: chatId, name: name, type: type, photo: photo }));
       })
       .catch(function (error) {
         console.error(error);
@@ -116,11 +100,14 @@ export default function StartChatDialog(props) {
     let chatName;
     let type;
     let partners = null;
+    let photo = null;
     switch (props.option.value) {
       case "conversation":
         type = CONVERSATION;
         path += `/conversations/create/${sessionId}/${checked[0]}`;
-        chatName = users.find((user) => user.id === checked[0]).name;
+        let partner = users.find((user) => user.id === checked[0]);
+        chatName = partner.name;
+        photo = partner.avatar;
         break;
       case "group":
         type = GROUP;
@@ -136,7 +123,7 @@ export default function StartChatDialog(props) {
         console.log(props.option.value);
         break;
     }
-    makeCreateRequest(path, chatName, partners, type);
+    makeCreateRequest(path, chatName, partners, type, photo);
   };
 
   const handleLookup = (event) => {
@@ -165,8 +152,6 @@ export default function StartChatDialog(props) {
     setChecked([]);
     setGroupName("");
   };
-
-  const handleGroupNameChange = (event) => setGroupName(event.target.value);
 
   return (
     <div style={{ overflowY: "hidden", height: "min-content" }}>
@@ -270,51 +255,11 @@ export default function StartChatDialog(props) {
           <Button onClick={handleStart}>Start</Button>
         </DialogActions>
       </Dialog>
-
-      <Dialog id="group-name-dialog" open={openGroupDetails} onClose={handleCloseGroupDetails}>
-        <DialogTitle> Details </DialogTitle>
-
-        <DialogContent id="group-name-dialog-context">
-          <DialogContentText>Choose the group name and profile picture.</DialogContentText>
-          <Box
-            id="group-name"
-            sx={{
-              height: "min-content",
-              padding: "0%",
-              width: "100%",
-              display: "flex",
-              boxSizing: "border-box",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Typography sx={{ flexBasis: "10", marginRight: "1%", marginLeft: "0" }}> Group name: </Typography>
-            <OutlinedInput
-              margin="dense"
-              id="group-name-input-with-icon-adornment"
-              type="text"
-              sx={{
-                flexBasis: "90",
-                margin: "1%",
-                borderRadius: "50px",
-              }}
-              value={groupName}
-              variant="outlined"
-              onChange={handleGroupNameChange}
-              endAdornment={
-                <InputAdornment position="end">
-                  <SupervisedUserCircleIcon fontSize="small" />
-                </InputAdornment>
-              }
-            />
-          </Box>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={handleCloseGroupDetails}>Ok</Button>
-        </DialogActions>
-      </Dialog>
+      <GroupDetailsDialog
+        groupName={{ value: groupName, setter: setGroupName }}
+        groupPhoto={{ value: groupPhoto, setter: setGroupPhoto }}
+        open={{ value: openGroupDetails, closer: handleCloseGroupDetails, setter: setOpenGroupDetails }}
+      />
     </div>
   );
 }

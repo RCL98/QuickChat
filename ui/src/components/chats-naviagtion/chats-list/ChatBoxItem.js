@@ -41,7 +41,6 @@ export default function ChatBoxItem(props) {
 
   const handleMenuChangeChatName = (event) => {
     setContextMenu(null);
-    props.setChatName(props.chat.name);
     props.setChosenChat(props.chat);
     props.dialog.setter(true);
   };
@@ -56,7 +55,7 @@ export default function ChatBoxItem(props) {
     <ListItem disablePadding onContextMenu={handleContextMenu}>
       <ListItemButton role={undefined} dense onClick={() => handleClickedItem(props.chat.id, props.chat.type)}>
         <ListItemAvatar>
-          <Avatar alt="User Profile Pic">
+          <Avatar alt="User Profile Pic" src={props.chat?.photo}>
             {props.chat.type === CONVERSATION ? <AccountCircleIcon /> : <GroupsIcon />}
           </Avatar>
         </ListItemAvatar>
@@ -70,8 +69,8 @@ export default function ChatBoxItem(props) {
         >
           <MenuItem onClick={handleMenuChangeChatName}>
             {props.chat.type === CONVERSATION
-              ? `Change conversation's ${props.chat.name}`
-              : `Change group's ${props.chat.name}`}
+              ? `Change conversation's ${props.chat.name} name`
+              : `Change group's ${props.chat.name} name`}
           </MenuItem>
         </Menu>
       </ListItemButton>

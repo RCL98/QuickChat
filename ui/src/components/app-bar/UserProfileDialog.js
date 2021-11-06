@@ -20,12 +20,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { avatarChanged, usernameChanged } from "../../reducers/profileSlice";
 
 import { WsClientContext } from "../../app/WsClientContext";
+import { serverHost } from "../../app/constants";
 
 import AlertDialog from "../../app/AlertDialog";
-import PrepareAvatarDialog from "./PrepareAvatarDialog";
+import PrepareAvatarDialog from "../../app/PrepareAvatarDialog";
 
 import axios from "axios";
-import { serverHost } from "../../app/constants";
 
 export default function UserProfileDialog(props) {
   const profile = useSelector((state) => state.profile);
@@ -139,7 +139,7 @@ export default function UserProfileDialog(props) {
                 alignItems: "center",
               }}
             >
-              <Avatar id="user-profile-pic" alt="Profile Pic" src={avatarPath} sx={{ width: "50%", height: "50%" }}>
+              <Avatar id="user-avatar" alt="User Avatar" src={avatarPath} sx={{ width: "50%", height: "50%" }}>
                 <AccountCircleIcon />
               </Avatar>
               <label htmlFor="avatar-photo-upload">
@@ -171,6 +171,7 @@ export default function UserProfileDialog(props) {
       />
       <PrepareAvatarDialog
         setAvatarPath={setAvatarPath}
+        type="user"
         uploadedPhoto={{ value: uploadPhoto, setter: setUploadPhoto }}
         open={{ value: openCropPhotoDialog, setter: setOpenCropPhotoDialog }}
       />
