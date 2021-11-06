@@ -67,7 +67,8 @@ export default function PrepareAvatarDialog(props) {
 
   const handleAccept = async () => {
     let formData = new FormData();
-    const blob = await (await fetch(croppedImage)).blob();
+    const newAvatar = croppedImage !== null ? croppedImage : editor.current.getImageScaledToCanvas().toDataURL();
+    const blob = await (await fetch(newAvatar)).blob();
     formData.append("file", blob);
     formData.append("userSessionId", sessionId);
     axios
@@ -80,7 +81,7 @@ export default function PrepareAvatarDialog(props) {
         console.log(response);
       })
       .catch((error) => console.error(error));
-    props.setAvatarPath(croppedImage);
+    props.setAvatarPath(newAvatar);
     handleClose();
   };
 
