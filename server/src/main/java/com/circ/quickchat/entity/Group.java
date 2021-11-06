@@ -27,6 +27,10 @@ public class Group {
 	@Id
 	private Long id;
 	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "photo_profile_id")
+	private Photo photo;
+	
 	@OneToOne(fetch = FetchType.EAGER, cascade =  CascadeType.ALL)
 	@JoinColumn(name = "id")
 	private Chat chat;

@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.Getter;
@@ -44,6 +45,10 @@ public class Chat {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "chat_id")
 	protected List<Message> messages;
+	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "photo_profile_id")
+	private Photo photo;
 	
 	public Chat() {
 		

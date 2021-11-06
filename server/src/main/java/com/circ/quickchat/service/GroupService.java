@@ -1,5 +1,6 @@
 package com.circ.quickchat.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.circ.quickchat.entity.Chat;
 import com.circ.quickchat.entity.Group;
 import com.circ.quickchat.entity.Message;
+import com.circ.quickchat.entity.Photo;
 import com.circ.quickchat.entity.User;
 import com.circ.quickchat.repositories.ChatRepository;
 import com.circ.quickchat.repositories.GroupRepository;
@@ -82,6 +84,11 @@ public class GroupService {
 			usr.setCurrentChat(null);
 			return usr;
 		}).collect(Collectors.toList()));
+		Photo photo = group.getPhoto();
+		if (photo != null) {
+			File deleteFile = new File(photo.getBigPhotoUri());
+			deleteFile.delete();
+		}
 		groupRepository.delete(group);
 		//chatRepository.delete(group.getChat());
 	}
