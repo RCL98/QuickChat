@@ -113,10 +113,12 @@ public class PhotoService {
 	
 	
 	public void deletePhoto(Photo photo) {
-		File file = new File(photo.getBigPhotoUri());
-		if (file.exists()) {
-			file.delete();
+		if (photo != null) {
+			File file = new File(photo.getBigPhotoUri());
+			if (file.exists()) {
+				file.delete();
+			}
+			photoRepository.delete(photo);
 		}
-		photoRepository.delete(photo);
 	}
 }
