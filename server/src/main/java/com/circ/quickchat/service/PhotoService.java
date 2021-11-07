@@ -116,7 +116,7 @@ public class PhotoService {
 	public void deletePhotoForGroup(Long groupId, String sessionId) {
 		Group group = groupService.getGroupById(groupId);
 		Photo photo = group.getPhoto();
-		group.setPhoto(photo);
+		group.setPhoto(null);
 		groupService.save(group);
 		deletePhoto(photo);
 		WebsocketMessage websocketMessage = WebsocketMessage.builder()
