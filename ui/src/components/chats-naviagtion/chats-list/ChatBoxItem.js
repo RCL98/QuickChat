@@ -22,7 +22,6 @@ export default function ChatBoxItem(props) {
   const wsClient = React.useContext(WsClientContext);
 
   const handleContextMenu = (event) => {
-    console.log(event.target);
     event.preventDefault();
     setContextMenu(
       contextMenu === null

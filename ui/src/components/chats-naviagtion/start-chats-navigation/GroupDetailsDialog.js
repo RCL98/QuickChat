@@ -7,10 +7,11 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
-import { Button, InputAdornment, OutlinedInput, Avatar } from "@mui/material";
+import { Button, InputAdornment, OutlinedInput, Avatar, ButtonGroup } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useSelector } from "react-redux";
 
@@ -80,7 +81,7 @@ export default function GroupDetailsDialog(props) {
           sx={{ maxWidth: "27vw", height: "60vh", boxSizing: "border-box" }}
         >
           <DialogContentText>
-            You need to give this new Group a name and you can also choose a group photo.
+            You need to give this new Group a name. You can also choose a group photo.
           </DialogContentText>
           <Stack id="group-details-change-dialog" spacing={2} sx={{ height: "80%" }}>
             <OutlinedInput
@@ -92,7 +93,7 @@ export default function GroupDetailsDialog(props) {
               variant="outlined"
               onChange={handleNameChange}
               startAdornment={
-                <InputAdornment position="end">
+                <InputAdornment position="start">
                   <SupervisedUserCircleIcon fontSize="small" />
                 </InputAdornment>
               }
@@ -126,9 +127,27 @@ export default function GroupDetailsDialog(props) {
                     sx={{ display: "none" }}
                     onChange={handlePhotoUpload}
                   />
-                  <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
-                    Change photo
-                  </Button>
+                  {props.groupPhoto.value === null ? (
+                    <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
+                      Upload photo
+                    </Button>
+                  ) : (
+                    <ButtonGroup variant="contained" aria-label="outlined photo button group">
+                      <Button component="span" endIcon={<AddAPhotoIcon />}>
+                        Change photo
+                      </Button>
+                      <Button
+                        component="span"
+                        endIcon={<DeleteIcon />}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          props.groupPhoto.setter(null);
+                        }}
+                      >
+                        Remove photo
+                      </Button>
+                    </ButtonGroup>
+                  )}
                 </label>
               </Stack>
             ) : null}

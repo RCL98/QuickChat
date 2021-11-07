@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
 import Input from "@mui/material/Input";
 import Stack from "@mui/material/Stack";
 import Dialog from "@mui/material/Dialog";
@@ -13,6 +14,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import Avatar from "@mui/material/Avatar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import DraggablePaperComponent from "../../app/DraggablePaperComponent";
 
@@ -64,14 +66,20 @@ export default function UserProfileDialog(props) {
           },
         })
         .then(function (response) {
-          console.log(response);
+          dispatch(avatarChanged(avatar));
         })
         .catch((error) => console.error(error));
-      dispatch(avatarChanged(avatar));
+    } else if (profile.avatar !== null) {
+      axios
+        .delete(serverHost + `/photos/user/${profile.sessionId}`)
+        .then(() => {
+          dispatch(avatarChanged(avatar));
+        })
+        .catch((error) => console.error(error));
     }
+    props.setOpen(false);
     dispatch(usernameChanged(auxUsername));
     wsClient.send("/user/change/name", {}, auxUsername);
-    props.setOpen(false);
   };
 
   const handlePhotoUpload = (event) => {
@@ -137,9 +145,6 @@ export default function UserProfileDialog(props) {
               spacing={3}
               sx={{
                 height: "85%",
-                borderStyle: "groove",
-                borderWidth: "2px",
-                borderRadius: "15px",
                 justifyContent: "center",
                 alignItems: "center",
               }}
@@ -155,9 +160,28 @@ export default function UserProfileDialog(props) {
                   sx={{ display: "none" }}
                   onChange={handlePhotoUpload}
                 />
-                <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
-                  Change photo
-                </Button>
+
+                {avatar === null ? (
+                  <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
+                    Upload photo
+                  </Button>
+                ) : (
+                  <ButtonGroup variant="contained" aria-label="outlined photo button group">
+                    <Button component="span" endIcon={<AddAPhotoIcon />}>
+                      Change photo
+                    </Button>
+                    <Button
+                      component="span"
+                      endIcon={<DeleteIcon />}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setAvatar(null);
+                      }}
+                    >
+                      Remove photo
+                    </Button>
+                  </ButtonGroup>
+                )}
               </label>
             </Stack>
           </Stack>

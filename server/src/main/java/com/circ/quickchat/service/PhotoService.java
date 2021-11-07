@@ -128,7 +128,7 @@ public class PhotoService {
 				.collect(Collectors.toList()));
 	}
 	
-	public void deletePhototForUser(String sessionId) {
+	public void deletePhotoForUser(String sessionId) {
 		User usr = userService.getUserBySessionId(sessionId);
 		Photo photo = usr.getPhoto();
 		usr.setPhoto(null);
@@ -167,8 +167,11 @@ public class PhotoService {
 	public byte[] getPhotoForGroup(Long groupId) throws IOException {
 		Group group = groupService.getGroupById(groupId);
 		Photo photo = group.getPhoto();
-		String photoUri = photo.getBigPhotoUri();
-		return getPhotoBytes(photoUri);
+		if (photo != null) {
+			String photoUri = photo.getBigPhotoUri();
+			return getPhotoBytes(photoUri);
+		}
+		return null;
 	}
 	
 	public byte[] getPhotoForUser(Long userId) throws IOException {

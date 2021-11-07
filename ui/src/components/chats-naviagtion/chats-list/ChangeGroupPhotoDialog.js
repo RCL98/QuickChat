@@ -1,15 +1,18 @@
 import React from "react";
 
 import Input from "@mui/material/Input";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Avatar from "@mui/material/Avatar";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
-import { Button, Avatar } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useDispatch, useSelector } from "react-redux";
 
@@ -51,6 +54,11 @@ export default function ChangeGroupPhotoDialog(props) {
         })
         .then(() => dispatch(chatPhotoUpdated({ id: props.chat.id, photo: groupPhoto })))
         .catch((error) => console.error(error));
+    } else if (props.chat.photo !== null) {
+      axios
+        .delete(serverHost + `/photos/group/${props.chat.id}/${sessionId}`)
+        .then(() => dispatch(chatPhotoUpdated({ id: props.chat.id, photo: groupPhoto })))
+        .catch((error) => console.error(error));
     }
     props.open.setter(false);
   };
@@ -59,9 +67,7 @@ export default function ChangeGroupPhotoDialog(props) {
     if (event.target.files && event.target.files.length > 0) {
       const fileSize = event.target.files[0].size / 1024 / 1024;
       const reader = new FileReader();
-      let formData = new FormData();
-      formData.append("file", event.target.files[0], event.target.files[0].name);
-      formData.append("userSessionId", sessionId);
+
       reader.addEventListener("load", () => {
         let img = new Image();
         img.src = reader.result;
@@ -69,16 +75,6 @@ export default function ChangeGroupPhotoDialog(props) {
           if (img.height < 300 && img.width < 300) {
             if (fileSize > 0.5) setAlertOpen(true);
             else {
-              axios
-                .post(serverHost + "/photos/upload", formData, {
-                  headers: {
-                    "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-                  },
-                })
-                .then(function (response) {
-                  console.log(response);
-                })
-                .catch((error) => console.error(error));
               setGroupPhoto(reader.result);
             }
           } else {
@@ -130,9 +126,27 @@ export default function ChangeGroupPhotoDialog(props) {
                 sx={{ display: "none" }}
                 onChange={handlePhotoUpload}
               />
-              <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
-                Change photo
-              </Button>
+              {groupPhoto === null ? (
+                <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
+                  Upload photo
+                </Button>
+              ) : (
+                <ButtonGroup variant="contained" aria-label="outlined photo button group">
+                  <Button component="span" endIcon={<AddAPhotoIcon />}>
+                    Change photo
+                  </Button>
+                  <Button
+                    component="span"
+                    endIcon={<DeleteIcon />}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setGroupPhoto(null);
+                    }}
+                  >
+                    Remove photo
+                  </Button>
+                </ButtonGroup>
+              )}
             </label>
           </Stack>
         </DialogContent>
