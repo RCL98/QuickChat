@@ -7,17 +7,14 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
-import { Button, InputAdornment, OutlinedInput, Avatar } from "@mui/material";
+import { Button, Avatar } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
-import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { chatNameUpdated, chatPhotoUpdated } from "../../../reducers/chatsSlice";
+import { chatPhotoUpdated } from "../../../reducers/chatsSlice";
 
-import { WsClientContext } from "../../../app/WsClientContext";
-import { CONVERSATION } from "../../../app/constants";
 import { serverHost } from "../../../app/constants";
 
 import AlertDialog from "../../../app/AlertDialog";
@@ -26,24 +23,18 @@ import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
 
 import axios from "axios";
 
-export default function ChatChangeDetailsDialog(props) {
+export default function ChangeGroupPhotoDialog(props) {
   const sessionId = useSelector((state) => state.profile.sessionId);
-  const [chatName, setChatName] = React.useState(props.chat?.name);
   const [groupPhoto, setGroupPhoto] = React.useState(props.chat?.photo);
   const [uploadPhoto, setUploadPhoto] = React.useState(null);
   const [openCropPhotoDialog, setOpenCropPhotoDialog] = React.useState(false);
   const [alertOpen, setAlertOpen] = React.useState(false);
 
-  const wsClient = React.useContext(WsClientContext);
-
   React.useEffect(() => {
-    setChatName(props.chat?.name);
     setGroupPhoto(props.chat?.photo);
   }, [props.chat]);
 
   const dispatch = useDispatch();
-
-  const handleChatNameChange = (event) => setChatName(event.target.value);
 
   const handleAccept = async () => {
     if (groupPhoto !== null) {
@@ -61,16 +52,6 @@ export default function ChatChangeDetailsDialog(props) {
         .then(() => dispatch(chatPhotoUpdated({ id: props.chat.id, photo: groupPhoto })))
         .catch((error) => console.error(error));
     }
-    const updatedChat = {
-      id: props.chat.id,
-      name: chatName,
-    };
-    wsClient.send(
-      props.chat.type === CONVERSATION ? "/conversations/change-name" : "/groups/change-name",
-      {},
-      JSON.stringify(updatedChat)
-    );
-    dispatch(chatNameUpdated(updatedChat));
     props.open.setter(false);
   };
 
@@ -118,68 +99,41 @@ export default function ChatChangeDetailsDialog(props) {
       <Dialog
         id="change-chat-name-dialog"
         open={props.open.value}
-        sx={{ height: "100%" }}
+        sx={{ height: "100%", witdh: "100%" }}
         onClose={handleClose}
         PaperComponent={DraggablePaperComponent}
       >
         <DialogTitle style={{ cursor: "move" }} id="draggable-chat-details-dialog-title">
-          Chat Details
+          Group Photo
         </DialogTitle>
 
-        <DialogContent
-          id="group-name-dialog-context"
-          sx={{ maxWidth: "27vw", height: "60vh", boxSizing: "border-box" }}
-        >
-          <DialogContentText>
-            {!props.new || props.chat?.type === CONVERSATION
-              ? "You can change the conversation's name."
-              : "You can change the group's name and photo."}
-          </DialogContentText>
-          <Stack id="chat-details-change-dialog" spacing={2} sx={{ height: "80%" }}>
-            <OutlinedInput
-              margin="dense"
-              id="chat-name-input-with-icon-adornment"
-              sx={{ height: "15%" }}
-              fullWidth
-              value={chatName}
-              variant="outlined"
-              onChange={handleChatNameChange}
-              startAdornment={
-                <InputAdornment position="end">
-                  <SupervisedUserCircleIcon fontSize="small" />
-                </InputAdornment>
-              }
-            />
-            {props.chat?.type !== CONVERSATION ? (
-              <Stack
-                id="group-picture"
-                spacing={3}
-                sx={{
-                  height: "85%",
-                  borderStyle: "groove",
-                  borderWidth: "2px",
-                  borderRadius: "15px",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Avatar id="group-photo" alt="Group Photo" src={groupPhoto} sx={{ width: "50%", height: "50%" }}>
-                  <GroupsIcon />
-                </Avatar>
-                <label htmlFor="group-photo-upload">
-                  <Input
-                    accept="image/*"
-                    id="group-photo-upload"
-                    type="file"
-                    sx={{ display: "none" }}
-                    onChange={handlePhotoUpload}
-                  />
-                  <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
-                    Change photo
-                  </Button>
-                </label>
-              </Stack>
-            ) : null}
+        <DialogContent id="group-name-dialog-context" sx={{ width: "30vw", height: "60vh", boxSizing: "border-box" }}>
+          <DialogContentText>You can change the group's photo.</DialogContentText>
+          <Stack
+            id="group-photo"
+            spacing={3}
+            sx={{
+              height: "90%",
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Avatar id="group-photo" alt="Group Photo" src={groupPhoto} sx={{ width: "50%", height: "50%" }}>
+              <GroupsIcon />
+            </Avatar>
+            <label htmlFor="group-photo-upload">
+              <Input
+                accept="image/*"
+                id="group-photo-upload"
+                type="file"
+                sx={{ display: "none" }}
+                onChange={handlePhotoUpload}
+              />
+              <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
+                Change photo
+              </Button>
+            </label>
           </Stack>
         </DialogContent>
 

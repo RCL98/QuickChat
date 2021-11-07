@@ -42,7 +42,13 @@ export default function ChatBoxItem(props) {
   const handleMenuChangeChatName = (event) => {
     setContextMenu(null);
     props.setChosenChat(props.chat);
-    props.dialog.setter(true);
+    props.dialogName.setter(true);
+  };
+
+  const handleMenuChangeGroupPhoto = (event) => {
+    setContextMenu(null);
+    props.setChosenChat(props.chat);
+    props.dialogPhoto.setter(true);
   };
 
   const handleClickedItem = async (chatId, type) => {
@@ -72,6 +78,9 @@ export default function ChatBoxItem(props) {
               ? `Change conversation's ${props.chat.name} name`
               : `Change group's ${props.chat.name} name`}
           </MenuItem>
+          {props.chat.type !== CONVERSATION ? (
+            <MenuItem onClick={handleMenuChangeGroupPhoto}>{`Change group's ${props.chat.name} photo`}</MenuItem>
+          ) : null}
         </Menu>
       </ListItemButton>
     </ListItem>

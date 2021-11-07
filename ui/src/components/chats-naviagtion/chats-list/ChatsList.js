@@ -5,10 +5,12 @@ import List from "@mui/material/List";
 import { useSelector } from "react-redux";
 
 import ChatBoxItem from "./ChatBoxItem";
-import ChatChangeDetailsDialog from "./ChatChangeDetailsDialog";
+import ChangeGroupPhotoDialog from "./ChangeGroupPhotoDialog";
+import ChangeChatNameDialog from "./ChangeChatNameDialog";
 
 export default function ChatsList(props) {
-  const [openDialog, setOpenDialog] = React.useState(false);
+  const [openNameDialog, setOpenNameDialog] = React.useState(false);
+  const [openPhotoDialog, setOpenPhotoDialog] = React.useState(false);
 
   const [chosenChat, setChosenChat] = React.useState(null);
 
@@ -30,13 +32,15 @@ export default function ChatsList(props) {
                 key={chat.id}
                 chat={chat}
                 labelId={labelId}
-                dialog={{ value: openDialog, setter: setOpenDialog }}
+                dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
+                dialogPhoto={{ value: openPhotoDialog, setter: setOpenPhotoDialog }}
                 setChosenChat={setChosenChat}
               />
             );
           })}
         </List>
-        <ChatChangeDetailsDialog chat={chosenChat} open={{ value: openDialog, setter: setOpenDialog }} />
+        <ChangeChatNameDialog chat={chosenChat} open={{ value: openNameDialog, setter: setOpenNameDialog }} />
+        <ChangeGroupPhotoDialog chat={chosenChat} open={{ value: openPhotoDialog, setter: setOpenPhotoDialog }} />
       </div>
     );
   };
