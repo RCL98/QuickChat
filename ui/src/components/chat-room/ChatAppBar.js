@@ -17,15 +17,14 @@ export default function ChatAppBar() {
   if (chat === undefined) chat = { name: "You" };
 
   const renderUsers = () => {
-    if (chat.type !== CONVERSATION)
+    if (chat.type !== CONVERSATION && users.length > 0)
       if (users.length <= 3)
         return (
           <Typography variant="body1">
             {users.map((user) => (user.isWriting ? `${user.name} is typing` : user.name)).join(", ")}
           </Typography>
         );
-      else {
-        console.log(users.sort((a, b) => (a.isWriting === b.isWriting ? 0 : a.isWriting ? -1 : 1)));
+      else
         return (
           <Typography variant="body1">
             {users
@@ -35,9 +34,13 @@ export default function ChatAppBar() {
               .join(", ") + ", ..."}
           </Typography>
         );
-      }
-    else if (users[0].isWriting) return <Typography variant="body1">{`${users[0].name} is typing`}</Typography>;
-    return null;
+    else if (users.length > 0 && users[0].isWriting)
+      return <Typography variant="body1">{`${users[0].name} is typing`}</Typography>;
+    return chat.type === CONVERSATION ? (
+      <Typography variant="body1"> The other user left the conversation </Typography>
+    ) : (
+      <Typography variant="body1"> There is nobody else in the group </Typography>
+    );
   };
 
   return (
