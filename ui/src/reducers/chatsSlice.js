@@ -14,12 +14,16 @@ const chatsSlice = createSlice({
         return obj.id !== action.payload.id;
       });
     },
-    chatUpdated(state, action) {
+    chatNameUpdated(state, action) {
       return state.map((obj) => (obj.id === action.payload.id ? { ...obj, name: action.payload.name } : obj));
+    },
+    chatPhotoUpdated(state, action) {
+      console.log(action);
+      return state.map((obj) => (obj.id === action.payload.id ? { ...obj, photo: action.payload.photo } : obj));
     },
   },
 });
 
-export const { chatAdded, chatDeleted, chatUpdated } = chatsSlice.actions;
+export const { chatAdded, chatDeleted, chatNameUpdated, chatPhotoUpdated } = chatsSlice.actions;
 
 export default chatsSlice.reducer;

@@ -9,7 +9,7 @@ import {
   usernameUpdated,
   currentyWritingUpdated,
 } from "../reducers/usersSlice";
-import { chatAdded, chatUpdated } from "../reducers/chatsSlice";
+import { chatAdded, chatNameUpdated, chatPhotoUpdated } from "../reducers/chatsSlice";
 import { currentChatChanged, sessionIdChanged, userIdChanged } from "../reducers/profileSlice";
 
 import * as constants from "./constants";
@@ -34,7 +34,36 @@ const messageFilter = (message) => {
           break;
 
         case constants.NEW_CHAT:
-          store.dispatch(chatAdded(generalMessage.content));
+          if (generalMessage.content.type === constants.CONVERSATION) {
+            axios
+              .get(constants.serverHost + `/photos/get/${generalMessage.content.partnerId}`, {
+                responseType: "arraybuffer",
+              })
+              .then((response) => {
+                generalMessage.content.photo =
+                  "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64");
+                store.dispatch(chatAdded(generalMessage.content));
+              })
+              .catch((error) => console.error(error));
+          } else {
+            store.dispatch(chatAdded(generalMessage.content));
+          }
+          break;
+
+        case constants.UPDATE_GROUP_PHOTO:
+          axios
+            .get(constants.serverHost + `/photos/group/get/${generalMessage.content}`, {
+              responseType: "arraybuffer",
+            })
+            .then((response) => {
+              store.dispatch(
+                chatPhotoUpdated({
+                  id: generalMessage.content,
+                  photo: "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64"),
+                })
+              );
+            })
+            .catch((error) => console.error(error));
           break;
 
         case constants.REQUESTED_CHAT:
@@ -60,7 +89,7 @@ const messageFilter = (message) => {
           break;
 
         case constants.UPDATE_GROUP_NAME:
-          store.dispatch(chatUpdated(generalMessage.content));
+          store.dispatch(chatNameUpdated(generalMessage.content));
           break;
 
         default:

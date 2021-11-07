@@ -42,17 +42,17 @@ public class ConversationController {
 	@Autowired
 	private ChatAllert chatAllert;
 	
-	@PostMapping("/conversations/create/{sessionId}/{anotherUserId}")
+	@PostMapping("/conversations/create/{sessionId}/{partnerId}")
 	public SimpleConversationDTO createConversation(@RequestBody ConversationInfo conversationInfo, 
-			@PathVariable String sessionId, @PathVariable Long anotherUserId) {
+			@PathVariable String sessionId, @PathVariable Long partnerId) {
 		Set<User> userSet = new HashSet<User>();
 		List<ConversationInfo> info = new ArrayList<ConversationInfo>();
 		User userThatCreatedConv = userService.getUserBySessionId(sessionId);
 		conversationInfo.setUserId(userThatCreatedConv.getId());
 		info.add(conversationInfo);
-		info.add(ConversationInfo.builder().name(userThatCreatedConv.getName()).userId(anotherUserId).build());
+		info.add(ConversationInfo.builder().name(userThatCreatedConv.getName()).userId(partnerId).build());
 		userSet.add(userThatCreatedConv);
-		User anotherUser = userService.getUserForId(anotherUserId);
+		User anotherUser = userService.getUserForId(partnerId);
 		userSet.add(anotherUser);
 		Chat newChat = Chat.builder().users(userSet).messages(new ArrayList<Message>()).build();
 		Conversation conversation = conversationService.save(Conversation.builder().chat(newChat)

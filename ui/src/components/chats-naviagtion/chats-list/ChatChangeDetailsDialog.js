@@ -14,7 +14,7 @@ import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { chatUpdated } from "../../../reducers/chatsSlice";
+import { chatNameUpdated, chatPhotoUpdated } from "../../../reducers/chatsSlice";
 
 import { WsClientContext } from "../../../app/WsClientContext";
 import { CONVERSATION } from "../../../app/constants";
@@ -29,20 +29,38 @@ import axios from "axios";
 export default function ChatChangeDetailsDialog(props) {
   const sessionId = useSelector((state) => state.profile.sessionId);
   const [chatName, setChatName] = React.useState(props.chat?.name);
-  const [avatarPath, setAvatarPath] = React.useState(null);
+  const [groupPhoto, setGroupPhoto] = React.useState(props.chat?.photo);
   const [uploadPhoto, setUploadPhoto] = React.useState(null);
   const [openCropPhotoDialog, setOpenCropPhotoDialog] = React.useState(false);
   const [alertOpen, setAlertOpen] = React.useState(false);
 
   const wsClient = React.useContext(WsClientContext);
 
-  React.useEffect(() => setChatName(props.chat?.name), [props.chat]);
+  React.useEffect(() => {
+    setChatName(props.chat?.name);
+    setGroupPhoto(props.chat?.photo);
+  }, [props.chat]);
 
   const dispatch = useDispatch();
 
   const handleChatNameChange = (event) => setChatName(event.target.value);
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
+    if (groupPhoto !== null) {
+      let formData = new FormData();
+      const blob = await (await fetch(groupPhoto)).blob();
+      formData.append("file", blob);
+      formData.append("groupId", props.chat.id);
+      formData.append("sessionId", sessionId);
+      axios
+        .post(serverHost + "/photos/group/upload", formData, {
+          headers: {
+            "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
+          },
+        })
+        .then(() => dispatch(chatPhotoUpdated({ id: props.chat.id, photo: groupPhoto })))
+        .catch((error) => console.error(error));
+    }
     const updatedChat = {
       id: props.chat.id,
       name: chatName,
@@ -52,8 +70,7 @@ export default function ChatChangeDetailsDialog(props) {
       {},
       JSON.stringify(updatedChat)
     );
-    dispatch(chatUpdated(updatedChat));
-
+    dispatch(chatNameUpdated(updatedChat));
     props.open.setter(false);
   };
 
@@ -81,7 +98,7 @@ export default function ChatChangeDetailsDialog(props) {
                   console.log(response);
                 })
                 .catch((error) => console.error(error));
-              setAvatarPath(reader.result);
+              setGroupPhoto(reader.result);
             }
           } else {
             setUploadPhoto(reader.result);
@@ -146,7 +163,7 @@ export default function ChatChangeDetailsDialog(props) {
                   alignItems: "center",
                 }}
               >
-                <Avatar id="group-photo" alt="Group Photo" src={avatarPath} sx={{ width: "50%", height: "50%" }}>
+                <Avatar id="group-photo" alt="Group Photo" src={groupPhoto} sx={{ width: "50%", height: "50%" }}>
                   <GroupsIcon />
                 </Avatar>
                 <label htmlFor="group-photo-upload">
@@ -178,7 +195,7 @@ export default function ChatChangeDetailsDialog(props) {
         title={"File to big"}
       />
       <PrepareAvatarDialog
-        setAvatarPath={setAvatarPath}
+        setAvatarPath={setGroupPhoto}
         uploadedPhoto={{ value: uploadPhoto, setter: setUploadPhoto }}
         open={{ value: openCropPhotoDialog, setter: setOpenCropPhotoDialog }}
       />

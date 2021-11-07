@@ -6,7 +6,6 @@ import javax.persistence.*;
 
 import DTO.ConversationDTO;
 import DTO.SimpleConversationDTO;
-import DTO.SimpleGroupDTO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -46,10 +45,10 @@ public class Conversation {
 		ConversationInfo conversationInfoForCurrentUser = conversationsInfo.stream()
 				.filter(convInfo -> convInfo.getUserId().equals(userConvId)).findAny()
 				.orElseThrow(() -> new InternalError("This user isn't into covnersation"));
-		Long anotherUserId = conversationsInfo.stream().map(convInfo -> convInfo.getUserId())
+		Long partnerId = conversationsInfo.stream().map(convInfo -> convInfo.getUserId())
 				.filter(userId -> !userId.equals(userConvId)).findAny()
 				.orElseThrow(() -> new InternalError("This conv contain only one user!"));
 		return SimpleConversationDTO.builder().id(id).name(conversationInfoForCurrentUser.getName())
-				.anotherUserId(anotherUserId).build();
+				.partnerId(partnerId).build();
 	}
 }

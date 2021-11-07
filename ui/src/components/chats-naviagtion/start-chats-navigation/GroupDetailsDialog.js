@@ -15,13 +15,10 @@ import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { useSelector } from "react-redux";
 
 import { CONVERSATION } from "../../../app/constants";
-import { serverHost } from "../../../app/constants";
 
 import AlertDialog from "../../../app/AlertDialog";
 import PrepareAvatarDialog from "../../../app/PrepareAvatarDialog";
 import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
-
-import axios from "axios";
 
 export default function GroupDetailsDialog(props) {
   const sessionId = useSelector((state) => state.profile.sessionId);
@@ -50,16 +47,6 @@ export default function GroupDetailsDialog(props) {
           if (img.height < 300 && img.width < 300) {
             if (fileSize > 0.5) setAlertOpen(true);
             else {
-              axios
-                .post(serverHost + "/photos/upload", formData, {
-                  headers: {
-                    "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-                  },
-                })
-                .then(function (response) {
-                  console.log(response);
-                })
-                .catch((error) => console.error(error));
               props.groupPhoto.setter(reader.result);
             }
           } else {

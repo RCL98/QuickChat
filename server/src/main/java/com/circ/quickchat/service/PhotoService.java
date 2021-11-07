@@ -63,7 +63,7 @@ public class PhotoService {
 		deletePhoto(prevPhoto);
 	}
 	
-	public void uploadPhotoForGroup(Long groupId, MultipartFile file) throws IOException {
+	public void uploadPhotoForGroup(Long groupId, MultipartFile file, String sessionId) throws IOException {
 		Group group =groupService.getGroupById(groupId);
 		Photo prevPhoto= group.getPhoto();
 		Photo photo = savePhoto(file);
@@ -74,7 +74,9 @@ public class PhotoService {
 				.content(groupId).messageType(MessageType.UPDATE_GROUP_PHOTO)
 				.build();
 		userUtilCommun.sendToUsers(websocketMessage, group.getChat().getUsers()
-				.stream().map(usr -> usr.getSessionId()).collect(Collectors.toList()));
+				.stream().map(usr -> usr.getSessionId())
+				.filter(filSessionId -> !filSessionId.equals(sessionId))
+				.collect(Collectors.toList()));
 		
 	}
 	

@@ -11,11 +11,6 @@ import Avatar from "@mui/material/Avatar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 export default function UsersListCheck(props) {
-  // React.useEffect(() => {
-  //   console.log("avatarrrrrrrrrr");
-  //   console.log(props.users[0].avatar);
-  // }, []);
-
   return (
     <List
       sx={{

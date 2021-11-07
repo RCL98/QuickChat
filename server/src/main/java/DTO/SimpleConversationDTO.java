@@ -19,5 +19,5 @@ public class SimpleConversationDTO {
 
 	private String name;
 	
-	private Long anotherUserId;
+	private Long partnerId;
 }

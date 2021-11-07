@@ -31,10 +31,12 @@ export default function UserProfileDialog(props) {
   const profile = useSelector((state) => state.profile);
   const wsClient = React.useContext(WsClientContext);
   const [auxUsername, setAuxUsername] = React.useState(profile.username);
-  const [avatarPath, setAvatarPath] = React.useState(null);
+  const [avatar, setAvatar] = React.useState(profile.avatar);
   const [uploadPhoto, setUploadPhoto] = React.useState(null);
   const [openCropPhotoDialog, setOpenCropPhotoDialog] = React.useState(false);
   const [alertOpen, setAlertOpen] = React.useState(false);
+
+  React.useEffect(() => setAvatar(profile.avatar), [profile]);
 
   const dispatch = useDispatch();
 
@@ -49,9 +51,25 @@ export default function UserProfileDialog(props) {
     props.setOpen(false);
   };
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
+    if (avatar !== null) {
+      let formData = new FormData();
+      const blob = await (await fetch(avatar)).blob();
+      formData.append("file", blob);
+      formData.append("userSessionId", profile.sessionId);
+      axios
+        .post(serverHost + "/photos/upload", formData, {
+          headers: {
+            "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
+          },
+        })
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch((error) => console.error(error));
+      dispatch(avatarChanged(avatar));
+    }
     dispatch(usernameChanged(auxUsername));
-    dispatch(avatarChanged(avatarPath));
     wsClient.send("/user/change/name", {}, auxUsername);
     props.setOpen(false);
   };
@@ -60,9 +78,6 @@ export default function UserProfileDialog(props) {
     if (event.target.files && event.target.files.length > 0) {
       const fileSize = event.target.files[0].size / 1024 / 1024;
       const reader = new FileReader();
-      let formData = new FormData();
-      formData.append("file", event.target.files[0], event.target.files[0].name);
-      formData.append("userSessionId", profile.sessionId);
       reader.addEventListener("load", () => {
         let img = new Image();
         img.src = reader.result;
@@ -70,17 +85,7 @@ export default function UserProfileDialog(props) {
           if (img.height < 300 && img.width < 300) {
             if (fileSize > 0.5) setAlertOpen(true);
             else {
-              axios
-                .post(serverHost + "/photos/upload", formData, {
-                  headers: {
-                    "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-                  },
-                })
-                .then(function (response) {
-                  console.log(response);
-                })
-                .catch((error) => console.error(error));
-              setAvatarPath(reader.result);
+              setAvatar(reader.result);
             }
           } else {
             setUploadPhoto(reader.result);
@@ -139,7 +144,7 @@ export default function UserProfileDialog(props) {
                 alignItems: "center",
               }}
             >
-              <Avatar id="user-avatar" alt="User Avatar" src={avatarPath} sx={{ width: "50%", height: "50%" }}>
+              <Avatar id="user-avatar" alt="User Avatar" src={avatar} sx={{ width: "50%", height: "50%" }}>
                 <AccountCircleIcon />
               </Avatar>
               <label htmlFor="avatar-photo-upload">
@@ -170,8 +175,7 @@ export default function UserProfileDialog(props) {
         title={"File to big"}
       />
       <PrepareAvatarDialog
-        setAvatarPath={setAvatarPath}
-        type="user"
+        setAvatarPath={setAvatar}
         uploadedPhoto={{ value: uploadPhoto, setter: setUploadPhoto }}
         open={{ value: openCropPhotoDialog, setter: setOpenCropPhotoDialog }}
       />

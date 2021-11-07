@@ -14,8 +14,7 @@ import GroupDetailsDialog from "./GroupDetailsDialog";
 import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
 
 import { chatAdded } from "../../../reducers/chatsSlice";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import axios from "axios";
 
@@ -86,9 +85,34 @@ export default function StartChatDialog(props) {
         name: name,
         chat: { users: partners },
       })
-      .then(function (response) {
+      .then(async function (response) {
         const chatId = response.data.id;
-        dispatch(chatAdded({ id: chatId, name: name, type: type, photo: photo }));
+        if (type === GROUP && groupPhoto !== null) {
+          let formData = new FormData();
+          const blob = await (await fetch(groupPhoto)).blob();
+          formData.append("file", blob);
+          formData.append("groupId", chatId);
+          formData.append("sessionId", sessionId);
+          console.log(formData.get("file"));
+          axios
+            .post(serverHost + "/photos/group/upload", formData, {
+              headers: {
+                "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
+              },
+            })
+            .then(function (response) {
+              var reader = new FileReader();
+              reader.onload = function () {
+                photo = reader.result;
+                setGroupPhoto(null);
+                dispatch(chatAdded({ id: chatId, name: name, type: type, photo: photo }));
+              };
+              reader.readAsDataURL(blob);
+            })
+            .catch((error) => console.error(error));
+        } else {
+          dispatch(chatAdded({ id: chatId, name: name, type: type, photo: photo }));
+        }
       })
       .catch(function (error) {
         console.error(error);

@@ -43,13 +43,13 @@ public class PhotoController {
 	
 	@PostMapping("/group/upload")
 	public void uploadPhotoGroup(@RequestParam("file") MultipartFile file,
-			@RequestParam("groupId") Long groupId) throws IOException {
-		photoService.uploadPhotoForGroup(groupId, file);
+			@RequestParam("groupId") Long groupId, @RequestParam("sessionId") String sessionId) throws IOException {
+		photoService.uploadPhotoForGroup(groupId, file, sessionId);
 	}
 	
-	@GetMapping("/group/{userId}") 
-	public  ResponseEntity<byte []> getGroupProfilePhoto(@PathVariable Long userId) throws IOException{
-		byte[] resource = photoService.getPhotoForGroup(userId);
+	@GetMapping("/group/get/{groupId}")
+	public  ResponseEntity<byte []> getGroupProfilePhoto(@PathVariable Long groupId) throws IOException{
+		byte[] resource = photoService.getPhotoForGroup(groupId);
 		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
 	}
 }

@@ -53,7 +53,9 @@ export default function ChatAppBar() {
         paddingLeft: "2%",
       }}
     >
-      <Avatar alt="Profile Pic">{chat.type === CONVERSATION ? <AccountCircleIcon /> : <GroupsIcon />}</Avatar>
+      <Avatar alt="Chat Photo" src={chat.photo}>
+        {chat.type === CONVERSATION ? <AccountCircleIcon /> : <GroupsIcon />}
+      </Avatar>
       <Stack direction="column">
         <Typography variant="h5">{chat.name}</Typography>
         {renderUsers()}
