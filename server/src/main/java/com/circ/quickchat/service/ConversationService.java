@@ -65,4 +65,9 @@ public class ConversationService {
 		.setName(simpleConversationDTO.getName());
 		conversationRepository.save(conversation);
 	}
+	
+	public List<Conversation> findAll() {
+		return conversationRepository.findAll();
+	}
+	
 }

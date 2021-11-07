@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,7 +45,11 @@ public class PhotoService {
 	@Autowired
 	private UserUtilCommun userUtilCommun;
 	
-	@Autowired GroupService groupService;
+	@Autowired 
+	private GroupService groupService;
+	
+	@Autowired
+	private ConversationService conversationService;
 	
 	@PostConstruct
 	public void initDirectoryPhotos() {
@@ -61,7 +68,33 @@ public class PhotoService {
 		usr.setPhoto(photo);
 		userService.save(usr);
 		deletePhoto(prevPhoto);
-	}
+		List<Map<String, Object>> convsInfo = conversationService.findAll()
+				.stream().filter(conv -> {
+					List<Long> users = conv.getConversationsInfo().stream().map(cInfo -> cInfo.getUserId())
+							.collect(Collectors.toList());
+					Boolean isGoodConv = users.stream().anyMatch(userId -> userId.equals(usr.getId()));
+					return isGoodConv;
+				}).map(conv -> {
+					Map<String, Object> infoConvMap = new HashMap<String, Object>();
+					List<Long> users = conv.getConversationsInfo().stream().map(cInfo -> cInfo.getUserId())
+							.collect(Collectors.toList());
+					Long userId  = users.stream().filter(usrId -> !usrId.equals(usr.getId())).findAny().get();
+					infoConvMap.put("userId", userId);
+					infoConvMap.put("convId", conv.getId());
+					return infoConvMap;
+				}).collect(Collectors.toList());
+		
+		convsInfo.forEach(infoConvMap -> {
+			String sessionId = userService.getUserForId((Long)infoConvMap.get("userId")).getSessionId();
+			Map<String, Long> messageMap = new HashMap<String, Long>();
+			messageMap.put("userId", usr.getId());
+			messageMap.put("convId", (Long)infoConvMap.get("convId"));
+			WebsocketMessage websocketMessage = WebsocketMessage.builder().messageType(MessageType.UPDATE_USER_PHOTO)
+					.content(messageMap).build();
+			userUtilCommun.sendToUser(sessionId, websocketMessage);
+
+		});
+ 	}
 	
 	public void uploadPhotoForGroup(Long groupId, MultipartFile file, String sessionId) throws IOException {
 		Group group =groupService.getGroupById(groupId);

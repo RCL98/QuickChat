@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,6 +90,11 @@ public class UserService {
 	
 	public User getUserForId(Long id) {
 		return userRepository.findById(id).orElseThrow(() -> new InternalError("Doesn exist an user with thid id!"));
+	}
+	
+	public List<String> getAllUsersSessionIdsByIds(List<Long> ids) {
+		return userRepository.findAllById(ids).stream().map(usr -> usr.getSessionId())
+				.collect(Collectors.toList());
 	}
 
 }
