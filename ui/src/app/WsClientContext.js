@@ -50,6 +50,10 @@ const messageFilter = (message) => {
           }
           break;
 
+        case constants.UPDATE_GROUP_NAME:
+          store.dispatch(chatNameUpdated(generalMessage.content));
+          break;
+
         case constants.UPDATE_GROUP_PHOTO:
           axios
             .get(constants.serverHost + `/photos/group/get/${generalMessage.content}`, {
@@ -59,6 +63,23 @@ const messageFilter = (message) => {
               store.dispatch(
                 chatPhotoUpdated({
                   id: generalMessage.content,
+                  photo: "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64"),
+                })
+              );
+            })
+            .catch((error) => console.error(error));
+          break;
+
+        case constants.UPDATE_USER_PHOTO:
+          console.log(generalMessage.content);
+          axios
+            .get(constants.serverHost + `/photos/get/${generalMessage.content.userId}`, {
+              responseType: "arraybuffer",
+            })
+            .then((response) => {
+              store.dispatch(
+                chatPhotoUpdated({
+                  id: generalMessage.content.convId,
                   photo: "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64"),
                 })
               );
@@ -86,10 +107,6 @@ const messageFilter = (message) => {
 
         case constants.UPDATE_WHO_IS_WRITING:
           store.dispatch(currentyWritingUpdated(generalMessage.content));
-          break;
-
-        case constants.UPDATE_GROUP_NAME:
-          store.dispatch(chatNameUpdated(generalMessage.content));
           break;
 
         default:
