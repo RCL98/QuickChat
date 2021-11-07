@@ -133,8 +133,10 @@ public class PhotoService {
 	private Photo savePhoto(MultipartFile file) throws IOException {
 		String photoUri = photoDirectoryPath + "/" + UUID.randomUUID();
 		File photoFile = new File(photoUri);
-		Files.copy(file.getInputStream(),photoFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		InputStream inFile = file.getInputStream();
+		Files.copy(inFile,photoFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		Photo photo = Photo.builder().bigPhotoUri(photoUri).build();
+		inFile.close();
 		return photoRepository.save(photo);
 	}
 	
@@ -143,6 +145,7 @@ public class PhotoService {
 		InputStream in = new FileInputStream(photoFile);
 		byte[] imagesBytes = new byte[in.available()];
 		in.read(imagesBytes);
+		in.close();
 		return imagesBytes;
 	}
 	
