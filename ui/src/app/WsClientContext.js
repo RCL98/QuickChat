@@ -21,13 +21,25 @@ import axios from "axios";
 // create context
 const WsClientContext = createContext();
 
-const messageFilter = (message) => {
+const getUsersAvatars = async (users) => {
+  for (let i = 0; i < users.length; i++) {
+    await axios
+      .get(constants.serverHost + `/photos/get/${users[i].id}`, {
+        responseType: "arraybuffer",
+      })
+      .then((response) => {
+        users[i].avatar = "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64");
+      })
+      .catch((error) => console.error(error));
+  }
+  return users;
+};
+
+const messageFilter = async (message) => {
   // called when the client receives a STOMP message from the server
   if (message) {
     if (message.body) {
-      // console.log("Am primit: ");
       const generalMessage = JSON.parse(message.body);
-      // console.log(generalMessage);
       switch (generalMessage.messageType) {
         case constants.MESSAGE:
           store.dispatch(messageAdded(generalMessage.content));
@@ -71,7 +83,6 @@ const messageFilter = (message) => {
           break;
 
         case constants.UPDATE_USER_PHOTO:
-          console.log(generalMessage.content);
           axios
             .get(constants.serverHost + `/photos/get/${generalMessage.content.userId}`, {
               responseType: "arraybuffer",
@@ -88,9 +99,11 @@ const messageFilter = (message) => {
           break;
 
         case constants.REQUESTED_CHAT:
-          store.dispatch(usersListUpdated(generalMessage.content.users));
+          const users = await getUsersAvatars(generalMessage.content.users);
+          console.log(users);
+          store.dispatch(usersListUpdated(users));
           store.dispatch(updateMessagesList(generalMessage.content.messages));
-          store.dispatch(currentChatChanged(generalMessage.content.id));
+          store.dispatch(currentChatChanged({ id: generalMessage.content.id, type: generalMessage.content.type }));
           break;
 
         case constants.ADD_USER_CHAT:

@@ -93,7 +93,6 @@ export default function StartChatDialog(props) {
           formData.append("file", blob);
           formData.append("groupId", chatId);
           formData.append("sessionId", sessionId);
-          console.log(formData.get("file"));
           axios
             .post(serverHost + "/photos/group/upload", formData, {
               headers: {
@@ -133,6 +132,7 @@ export default function StartChatDialog(props) {
         chatName = partner.name;
         photo = partner.avatar;
         break;
+
       case "group":
         type = GROUP;
         path += `/groups/create/${sessionId}`;
@@ -143,6 +143,7 @@ export default function StartChatDialog(props) {
           });
         chatName = groupName;
         break;
+
       default:
         console.log(props.option.value);
         break;

@@ -52,7 +52,7 @@ export default function NewMessageBox() {
       };
       dispatch(messageAdded(msg));
 
-      if (wsClient) {
+      if (wsClient && profile.currentChat != null) {
         const msgExt = {
           chat: { id: profile.currentChat },
           content: content,

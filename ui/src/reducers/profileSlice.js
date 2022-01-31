@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   username: "Anonymous_" + Math.floor(100000 + Math.random() * 900000).toString(),
   userId: null,
-  currentChat: null,
+  currentChatId: null,
+  currentChatType: null,
   sessionId: null,
   avatar: null,
 };
@@ -19,7 +20,7 @@ const profileSlice = createSlice({
       return { ...state, userId: action.payload };
     },
     currentChatChanged(state, action) {
-      return { ...state, currentChat: action.payload };
+      return { ...state, currentChatId: action.payload.id, currentChatType: action.payload.type };
     },
     sessionIdChanged(state, action) {
       return { ...state, sessionId: action.payload };

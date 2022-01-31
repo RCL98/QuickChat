@@ -2,8 +2,14 @@ import React from "react";
 
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Avatar from "@mui/material/Avatar";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { makeStyles } from "@mui/styles";
+
 import { useSelector } from "react-redux";
+
+import { CONVERSATION } from "../../app/constants";
 
 const messageStyles = makeStyles((theme) => ({
   root: {
@@ -48,14 +54,28 @@ const messageStyles = makeStyles((theme) => ({
 
 export default function MessageBox(props) {
   const userId = useSelector((state) => state.profile.userId);
+  const currentChatType = useSelector((state) => state.profile.currentChatType);
+  const avatar = useSelector((state) => state.users.find((user) => user.id === props.author.id)).avatar;
   const classes = messageStyles(props.author.id === userId);
-  console.log(props);
+
   return (
     <div className={classes.root}>
       <Paper className={classes.root + " paper"}>
-        <Typography variant="h6" className={classes.author}>
-          {userId !== props.author.id ? props.author.name : "Me"}
-        </Typography>
+        {currentChatType === CONVERSATION ? (
+          <Typography variant="h6" className={classes.author}>
+            {userId !== props.author.id ? props.author.name : "Me"}
+          </Typography>
+        ) : (
+          <Stack direction="row">
+            <Avatar alt="User avatar" src={avatar}>
+              <AccountCircleIcon fontSize="small" />
+            </Avatar>
+            <Typography variant="h6" className={classes.author}>
+              {userId !== props.author.id ? props.author.name : "Me"}
+            </Typography>
+          </Stack>
+        )}
+
         <Typography variant="body2" className={classes.messageBody}>
           {props.content}
         </Typography>
