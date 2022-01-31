@@ -55,13 +55,13 @@ const messageStyles = makeStyles((theme) => ({
 export default function MessageBox(props) {
   const userId = useSelector((state) => state.profile.userId);
   const currentChatType = useSelector((state) => state.profile.currentChatType);
-  const avatar = useSelector((state) => state.users.find((user) => user.id === props.author.id)).avatar;
+  const avatar = useSelector((state) => state.users.find((user) => user.id === props.author.id))?.avatar;
   const classes = messageStyles(props.author.id === userId);
 
   return (
     <div className={classes.root}>
       <Paper className={classes.root + " paper"}>
-        {currentChatType === CONVERSATION ? (
+        {currentChatType === CONVERSATION || currentChatType == null ? (
           <Typography variant="h6" className={classes.author}>
             {userId !== props.author.id ? props.author.name : "Me"}
           </Typography>
