@@ -33,12 +33,11 @@ public class UserController {
 	@PostMapping("/user/create")
 	public User createTemporaryUser(@RequestBody User user) {
 		user.setSessionId(UUID.randomUUID().toString());
-		User userDb = userService.save(user);
-		return userDb;
+		return userService.save(user);
 	}
 	
 	@MessageMapping("/user/change/name")
-	public void processChageUserName(String newName,  SimpMessageHeaderAccessor  headerAccessor) {
+	public void processChangeUserName(String newName, SimpMessageHeaderAccessor  headerAccessor) {
 		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
 		User user = userService.getUserBySessionId(sessionId);
 		user.setName(newName);

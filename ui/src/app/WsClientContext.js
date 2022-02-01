@@ -9,7 +9,7 @@ import {
   usernameUpdated,
   currentyWritingUpdated,
 } from "../reducers/usersSlice";
-import { chatAdded, chatNameUpdated, chatPhotoUpdated } from "../reducers/chatsSlice";
+import { chatAdded, chatNameUpdated, chatNewNotification, chatPhotoUpdated } from "../reducers/chatsSlice";
 import { currentChatChanged, sessionIdChanged, userIdChanged } from "../reducers/profileSlice";
 
 import * as constants from "./constants";
@@ -43,6 +43,10 @@ const messageFilter = async (message) => {
       switch (generalMessage.messageType) {
         case constants.MESSAGE:
           store.dispatch(messageAdded(generalMessage.content));
+          break;
+
+        case constants.NOTIFICATION:
+          store.dispatch(chatNewNotification(generalMessage.content));
           break;
 
         case constants.NEW_CHAT:

@@ -9,17 +9,32 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import Badge from "@mui/material/Badge";
+import MailIcon from "@mui/icons-material/Mail";
 import GroupsIcon from "@mui/icons-material/Groups";
+import { makeStyles } from "@mui/styles";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { WsClientContext } from "../../../app/WsClientContext";
 import { CONVERSATION } from "../../../app/constants";
+
+import { chatResetNotifications } from "../../../reducers/chatsSlice";
+
+const chatBoxStyles = makeStyles((theme) => ({
+  chatBox: {
+    borderRadius: "20px",
+    borderStyle: "outset",
+  },
+}));
 
 export default function ChatBoxItem(props) {
   const [contextMenu, setContextMenu] = React.useState(null);
   const sessionId = useSelector((state) => state.profile.sessionId);
   const wsClient = React.useContext(WsClientContext);
+  const classes = chatBoxStyles();
+
+  const dispatch = useDispatch();
 
   const handleContextMenu = (event) => {
     event.preventDefault();
@@ -52,12 +67,24 @@ export default function ChatBoxItem(props) {
 
   const handleClickedItem = async (chatId, type) => {
     console.log(chatId, type);
+    dispatch(chatResetNotifications({ chatId }));
     if (type === CONVERSATION) wsClient.send(`/conversations/get/${chatId}/user/${sessionId}`, {}, {});
     else wsClient.send(`/groups/get/${chatId}/user/${sessionId}`, {}, {});
   };
 
   return (
-    <ListItem disablePadding onContextMenu={handleContextMenu}>
+    <ListItem
+      disablePadding
+      onContextMenu={handleContextMenu}
+      className={classes.chatBox}
+      secondaryAction={
+        props.chat.notifications !== 0 ? (
+          <Badge badgeContent={props.chat.notifications} color="success">
+            <MailIcon color="action" fontSize="small" />
+          </Badge>
+        ) : null
+      }
+    >
       <ListItemButton role={undefined} dense onClick={() => handleClickedItem(props.chat.id, props.chat.type)}>
         <ListItemAvatar>
           <Avatar alt="User Profile Pic" src={props.chat?.photo}>
