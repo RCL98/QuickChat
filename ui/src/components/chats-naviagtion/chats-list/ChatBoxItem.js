@@ -53,6 +53,13 @@ export default function ChatBoxItem(props) {
 
   const handleCloseMenu = () => setContextMenu(null);
 
+  const handleMenuAddUsers = (event) => {
+    setContextMenu(null);
+    props.setChosenChat(props.chat);
+    console.log(props.dialogAddUsers.value);
+    props.dialogAddUsers.setter(true);
+  };
+
   const handleMenuChangeChatName = (event) => {
     setContextMenu(null);
     props.setChosenChat(props.chat);
@@ -66,7 +73,6 @@ export default function ChatBoxItem(props) {
   };
 
   const handleClickedItem = async (chatId, type) => {
-    console.log(chatId, type);
     dispatch(chatResetNotifications({ chatId }));
     if (type === CONVERSATION) wsClient.send(`/conversations/get/${chatId}/user/${sessionId}`, {}, {});
     else wsClient.send(`/groups/get/${chatId}/user/${sessionId}`, {}, {});
@@ -106,6 +112,9 @@ export default function ChatBoxItem(props) {
           </MenuItem>
           {props.chat.type !== CONVERSATION ? (
             <MenuItem onClick={handleMenuChangeGroupPhoto}>{`Change group's ${props.chat.name} photo`}</MenuItem>
+          ) : null}
+          {props.chat.type !== CONVERSATION ? (
+            <MenuItem onClick={handleMenuAddUsers}>Add new user to chat</MenuItem>
           ) : null}
         </Menu>
       </ListItemButton>

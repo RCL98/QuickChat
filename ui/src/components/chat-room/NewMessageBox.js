@@ -12,6 +12,7 @@ import { WsClientContext } from "../../app/WsClientContext";
 
 export default function NewMessageBox() {
   const wsClient = React.useContext(WsClientContext);
+
   const [content, setContent] = React.useState("");
   const [isWriting, setIsWriting] = React.useState(false);
   const [timer, setTimer] = React.useState(null);

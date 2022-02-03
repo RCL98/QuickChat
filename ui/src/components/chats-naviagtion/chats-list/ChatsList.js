@@ -7,10 +7,12 @@ import { useSelector } from "react-redux";
 import ChatBoxItem from "./ChatBoxItem";
 import ChangeGroupPhotoDialog from "./ChangeGroupPhotoDialog";
 import ChangeChatNameDialog from "./ChangeChatNameDialog";
+import AddNewUserDialog from "./AddNewUserDialog";
 
 export default function ChatsList(props) {
   const [openNameDialog, setOpenNameDialog] = React.useState(false);
   const [openPhotoDialog, setOpenPhotoDialog] = React.useState(false);
+  const [openAddUsersDialog, setOpenAddUsersDialog] = React.useState(false);
 
   const [chosenChat, setChosenChat] = React.useState(null);
 
@@ -34,6 +36,7 @@ export default function ChatsList(props) {
                 labelId={labelId}
                 dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
                 dialogPhoto={{ value: openPhotoDialog, setter: setOpenPhotoDialog }}
+                dialogAddUsers={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }}
                 setChosenChat={setChosenChat}
               />
             );
@@ -41,6 +44,7 @@ export default function ChatsList(props) {
         </List>
         <ChangeChatNameDialog chat={chosenChat} open={{ value: openNameDialog, setter: setOpenNameDialog }} />
         <ChangeGroupPhotoDialog chat={chosenChat} open={{ value: openPhotoDialog, setter: setOpenPhotoDialog }} />
+        <AddNewUserDialog chat={chosenChat} open={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }} />
       </div>
     );
   };

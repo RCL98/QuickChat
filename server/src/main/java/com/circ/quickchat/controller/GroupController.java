@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,15 +53,13 @@ public class GroupController {
 		User userThatCreatedChat = userService.getUserBySessionId(sessionId);
 		List<Long> usersThatWillBeAddedInChat = group.getChat().getUsers().stream().map(usr -> usr.getId())
 				.collect(Collectors.toList());
-		Group groupFromDb = userService.addUsersInChat(group, usersThatWillBeAddedInChat);
+		Group groupFromDb = userService.addUsersInNewChat(group, usersThatWillBeAddedInChat);
 		groupFromDb.getChat().getUsers().add(userThatCreatedChat);
-//		userUtilCommun.sendToUser(sessionId, WebsocketMessage.builder().messageType(MessageType.REQUESTED_CHAT)
-//				.content(chatFromDb.toChatDTO()).build());
 		return groupService.save(groupFromDb).toSimpleGroupDTO();
 	}
 	
-	@MessageMapping("/groups/addUser/{groupId}/{userId}")
-	public void addUserInChat(@DestinationVariable Long groupId, @DestinationVariable Long userId,
+	@MessageMapping("/groups/addUsers/{groupId}")
+	public void addUserInChat(@DestinationVariable Long groupId, @Payload List<Long> users,
 			SimpMessageHeaderAccessor  headerAccessor) {
 		Group group = groupService.getGroupById(groupId);
 		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
@@ -68,7 +67,7 @@ public class GroupController {
 		if (!group.getChat().getUsers().stream().anyMatch(usr -> usr.getId().equals(user.getId()))) {
 			throw new InternalError("User " + user.getId() + " that try to add another user isn't into chat!");
 		}
-		userService.addUserInChat(group, userId);
+		userService.addUsersInChat(group, users);
 	}
 	
 	@MessageMapping("/groups/get/{groupId}/user/{sessionId}")

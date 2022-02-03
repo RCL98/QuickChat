@@ -9,29 +9,26 @@ import { Button, InputAdornment, OutlinedInput, Typography, Box, IconButton } fr
 import SearchIcon from "@mui/icons-material/Search";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
-import UsersListCheck from "./UsersListCheck";
-import GroupDetailsDialog from "./GroupDetailsDialog";
+import UsersListCheck from "../start-chats-navigation/UsersListCheck";
 import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
 
-import { chatAdded } from "../../../reducers/chatsSlice";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 import axios from "axios";
+import { WsClientContext } from "../../../app/WsClientContext";
 
-import { serverHost, GROUP, CONVERSATION } from "../../../app/constants";
+import { serverHost } from "../../../app/constants";
 
-export default function StartChatDialog(props) {
+export default function AddNewUserDialog(props) {
+  const wsClient = React.useContext(WsClientContext);
+  console.log(props.chat?.id);
+  let oldUsers = useSelector((state) => state.chats.find((chat) => chat.id === props.chat?.id))?.users;
   const [lookupText, setLookupText] = React.useState("");
   const [checked, setChecked] = React.useState([]);
   const [users, setUsers] = React.useState([]);
   const [renderedUsers, setRenderedUsers] = React.useState([]);
-  const [openGroupDetails, setOpenGroupDetails] = React.useState(false);
-  const [groupName, setGroupName] = React.useState("");
-  const [groupPhoto, setGroupPhoto] = React.useState(null);
 
   const sessionId = useSelector((state) => state.profile.sessionId);
-
-  const dispatch = useDispatch();
 
   const getUsersAvatars = async (users) => {
     for (let i = 0; i < users.length; i++) {
@@ -64,91 +61,28 @@ export default function StartChatDialog(props) {
   React.useEffect(getUsersList, [props.open.value, sessionId]);
 
   const handleToggle = (value) => () => {
-    if (props.option.value === "conversation") {
-      if (checked[0] !== value) setChecked([value]);
+    const currentIndex = checked.indexOf(value);
+    const newChecked = [...checked];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
     } else {
-      const currentIndex = checked.indexOf(value);
-      const newChecked = [...checked];
-
-      if (currentIndex === -1) {
-        newChecked.push(value);
-      } else {
-        newChecked.splice(currentIndex, 1);
-      }
-      setChecked(newChecked);
+      newChecked.splice(currentIndex, 1);
     }
+    setChecked(newChecked);
   };
 
-  const makeCreateRequest = (path, name, partners, type, photo) => {
-    axios
-      .post(path, {
-        name: name,
-        chat: { users: partners },
-      })
-      .then(async function (response) {
-        const chatId = response.data.id;
-        if (type === GROUP && groupPhoto !== null) {
-          let formData = new FormData();
-          const blob = await (await fetch(groupPhoto)).blob();
-          formData.append("file", blob);
-          formData.append("groupId", chatId);
-          formData.append("sessionId", sessionId);
-          axios
-            .post(serverHost + "/photos/group/upload", formData, {
-              headers: {
-                "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-              },
-            })
-            .then(function (response) {
-              var reader = new FileReader();
-              reader.onload = function () {
-                photo = reader.result;
-                setGroupPhoto(null);
-                dispatch(chatAdded({ id: chatId, name: name, type: type, photo: photo }));
-              };
-              reader.readAsDataURL(blob);
-            })
-            .catch((error) => console.error(error));
-        } else {
-          dispatch(chatAdded({ id: chatId, name: name, type: type, photo: photo }));
-        }
-      })
-      .catch(function (error) {
-        console.error(error);
-      });
-  };
-
-  const startChat = () => {
-    let path = serverHost;
-    let chatName;
-    let type;
-    let partners = null;
-    let photo = null;
-    switch (props.option.value) {
-      case "conversation":
-        type = CONVERSATION;
-        path += `/conversations/create/${sessionId}/${checked[0]}`;
-        let partner = users.find((user) => user.id === checked[0]);
-        chatName = partner.name;
-        photo = partner.avatar;
-        break;
-
-      case "group":
-        type = GROUP;
-        path += `/groups/create/${sessionId}`;
-        partners = users
-          .filter((user) => checked.indexOf(user.id) !== -1)
-          .map((user) => {
-            return { id: user.id };
-          });
-        chatName = groupName;
-        break;
-
-      default:
-        console.log(props.option.value);
-        break;
+  const handleAddUsers = () => {
+    if (wsClient) {
+      console.log(oldUsers);
+      const payload = users
+        .filter((user) => checked.indexOf(user.id) !== -1)
+        .map((user) => {
+          return user.id;
+        });
+      wsClient.send(`/groups/addUsers/${props.chat.id}`, {}, JSON.stringify(payload));
     }
-    makeCreateRequest(path, chatName, partners, type, photo);
+    props.open.setter(false);
   };
 
   const handleLookup = (event) => {
@@ -161,21 +95,10 @@ export default function StartChatDialog(props) {
     }
   };
 
-  const handleStart = () => (props.option.value === "group" ? setOpenGroupDetails(true) : startChat());
-
   const handleClose = () => {
     props.open.setter(false);
-    props.option.setter(null);
     setChecked([]);
     setUsers([]);
-  };
-
-  // Group details dialog functions
-  const handleCloseGroupDetails = () => {
-    setOpenGroupDetails(false);
-    startChat();
-    setChecked([]);
-    setGroupName("");
   };
 
   return (
@@ -183,20 +106,16 @@ export default function StartChatDialog(props) {
       <Dialog
         open={props.open.value}
         onClose={handleClose}
-        id="start-chat-dialog"
+        id="add-new-users-dialog"
         PaperComponent={DraggablePaperComponent}
         sx={{ overflowY: "hidden", height: "100%" }}
       >
-        <DialogTitle style={{ cursor: "move" }} id="draggable-start-chat-dialog-title">
+        <DialogTitle style={{ cursor: "move" }} id="draggable-add-new-users-dialog-title">
           Start a chat
         </DialogTitle>
 
-        <DialogContent id="start-chat-dialog-context" sx={{ overflow: "hidden", height: "100%" }}>
-          <DialogContentText>
-            {props.option.value === "group"
-              ? "Choose some users with which to start a group."
-              : "Choose a user with which to start a conversation."}
-          </DialogContentText>
+        <DialogContent id="add-new-users-dialog-context" sx={{ overflow: "hidden", height: "100%" }}>
+          <DialogContentText>Choose some users too add to the group.</DialogContentText>
           <Box
             id="users-dialog"
             sx={{
@@ -277,15 +196,10 @@ export default function StartChatDialog(props) {
 
         <DialogActions>
           <Button onClick={handleClose}>Ok</Button>
-          <Button onClick={handleStart}>Start</Button>
           <Button onClick={handleClose}>Close</Button>
+          <Button onClick={handleAddUsers}>Add</Button>
         </DialogActions>
       </Dialog>
-      <GroupDetailsDialog
-        groupName={{ value: groupName, setter: setGroupName }}
-        groupPhoto={{ value: groupPhoto, setter: setGroupPhoto }}
-        open={{ value: openGroupDetails, closer: handleCloseGroupDetails, setter: setOpenGroupDetails }}
-      />
     </div>
   );
 }
