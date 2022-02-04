@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 
 import store from "./store";
-import { updateMessagesList, messageAdded } from "../reducers/messagesSlice";
+import { updateMessagesList, messageAdded, clearMessageList } from "../reducers/messagesSlice";
 import {
   usersListUpdated,
   userAdded,
@@ -20,6 +20,10 @@ import axios from "axios";
 
 // create context
 const WsClientContext = createContext();
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const getUsersAvatars = async (users) => {
   for (let i = 0; i < users.length; i++) {
@@ -103,8 +107,9 @@ const messageFilter = async (message) => {
           break;
 
         case constants.REQUESTED_CHAT:
+          store.dispatch(clearMessageList());
+          await sleep(500);
           const users = await getUsersAvatars(generalMessage.content.users);
-          console.log(users);
           store.dispatch(usersListUpdated(users));
           store.dispatch(updateMessagesList(generalMessage.content.messages));
           store.dispatch(currentChatChanged({ id: generalMessage.content.id, type: generalMessage.content.type }));
