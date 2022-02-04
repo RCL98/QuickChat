@@ -25,14 +25,21 @@ const chatBoxStyles = makeStyles((theme) => ({
   chatBox: {
     borderRadius: "20px",
     borderStyle: "outset",
+    backgroundColor: (props) => {
+      return props
+        ? theme.palette.background.default
+        : theme.palette.mode === "dark"
+        ? theme.palette.grey[800]
+        : "#d9d9d9";
+    },
   },
 }));
 
 export default function ChatBoxItem(props) {
   const [contextMenu, setContextMenu] = React.useState(null);
-  const sessionId = useSelector((state) => state.profile.sessionId);
+  const profile = useSelector((state) => state.profile);
   const wsClient = React.useContext(WsClientContext);
-  const classes = chatBoxStyles();
+  const classes = chatBoxStyles(profile.currentChatId === props.chat.id);
 
   const dispatch = useDispatch();
 
@@ -74,8 +81,8 @@ export default function ChatBoxItem(props) {
 
   const handleClickedItem = async (chatId, type) => {
     dispatch(chatResetNotifications({ chatId }));
-    if (type === CONVERSATION) wsClient.send(`/conversations/get/${chatId}/user/${sessionId}`, {}, {});
-    else wsClient.send(`/groups/get/${chatId}/user/${sessionId}`, {}, {});
+    if (type === CONVERSATION) wsClient.send(`/conversations/get/${chatId}/user/${profile.sessionId}`, {}, {});
+    else wsClient.send(`/groups/get/${chatId}/user/${profile.sessionId}`, {}, {});
   };
 
   return (

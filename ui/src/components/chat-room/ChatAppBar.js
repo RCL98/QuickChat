@@ -13,7 +13,7 @@ import { CONVERSATION } from "../../app/constants";
 export default function ChatAppBar() {
   const profile = useSelector((state) => state.profile);
   const users = useSelector((state) => state.users).filter((user) => user.id !== profile.userId);
-  let chat = useSelector((state) => state.chats.find((chat) => chat.id === profile.currentChat));
+  let chat = useSelector((state) => state.chats.find((chat) => chat.id === profile.currentChatId));
   if (chat === undefined) chat = { name: "You" };
 
   const renderUsers = () => {
