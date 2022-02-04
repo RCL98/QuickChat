@@ -48,6 +48,21 @@ public class GroupController {
 		groupService.sendMessage(message, sessionId);
 	}
 	
+	@MessageMapping("/groups/getmeout/{groupId}")
+	public void getMeOutOfGroup(@DestinationVariable Long groupId, SimpMessageHeaderAccessor headerAccessor) {
+		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
+		User user = userService.getUserBySessionId(sessionId);
+		Group group = groupService.getGroupById(groupId);
+		groupService.deleteUserInGroup(group, user);
+	}
+	
+	@MessageMapping("/group/getoutuser/{groupId}/user/{userId}")
+	public void getOutUser(@DestinationVariable Long groupId, @DestinationVariable Long userId) {
+		User user = userService.getUserForId(userId);
+		Group group = groupService.getGroupById(groupId);
+		groupService.deleteUserInGroup(group, user);
+	}
+	
 	@PostMapping("/groups/create/{sessionId}")
 	public SimpleGroupDTO createNewGroup(@RequestBody  Group group, @PathVariable String sessionId) {
 		User userThatCreatedChat = userService.getUserBySessionId(sessionId);

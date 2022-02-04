@@ -22,5 +22,5 @@ public class GroupDTO {
 	private ChatTypes type = ChatTypes.GROUP;
 
 	private List<Message> messages;
-	private Set<User> users;
+	private Set<UserDTO> users;
 }
