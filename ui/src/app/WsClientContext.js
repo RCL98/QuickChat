@@ -21,9 +21,9 @@ import axios from "axios";
 // create context
 const WsClientContext = createContext();
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// function sleep(ms) {
+//   return new Promise((resolve) => setTimeout(resolve, ms));
+// }
 
 const getUsersAvatars = async (users) => {
   for (let i = 0; i < users.length; i++) {
@@ -108,7 +108,7 @@ const messageFilter = async (message) => {
 
         case constants.REQUESTED_CHAT:
           store.dispatch(clearMessageList());
-          await sleep(500);
+          // await sleep(500);
           const users = await getUsersAvatars(generalMessage.content.users);
           store.dispatch(usersListUpdated(users));
           store.dispatch(updateMessagesList(generalMessage.content.messages));
