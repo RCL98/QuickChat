@@ -80,7 +80,7 @@ export default function MessageBox(props) {
           {props.content}
         </Typography>
         <Typography variant="subtitle2" className={classes.createdAt}>
-          {new Date(props.createdAt).toTimeString().substr(0, 5)}
+          {new Date(props.createdAt).toTimeString().substring(0, 5)}
         </Typography>
       </Paper>
     </div>

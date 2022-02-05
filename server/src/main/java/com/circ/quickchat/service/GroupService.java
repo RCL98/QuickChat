@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import DTO.MessageDTO;
+import DTO.NotificationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,10 +56,12 @@ public class GroupService {
                 }
             }
         });
+        MessageDTO messageDTO = message.toMessageDTO();
         WebsocketMessage websocketMessage = WebsocketMessage.builder().messageType(MessageType.MESSAGE)
-                .content(message.toMessageDTO()).build();
+                .content(messageDTO).build();
         WebsocketMessage websocketNotification = WebsocketMessage.builder().messageType(MessageType.NOTIFICATION)
-                .content(chat.getId()).build();
+                .content(NotificationDTO.builder().chatId(chat.getId())
+                        .message(messageDTO).build()).build();
         userUtilCommun.sendToUsers(websocketMessage, usersFromChatWithoutAuthor);
         userUtilCommun.sendToUsers(websocketNotification, usersFromChatNotOn);
     }

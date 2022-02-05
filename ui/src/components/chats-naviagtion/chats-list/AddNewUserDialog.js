@@ -21,7 +21,7 @@ import { serverHost } from "../../../app/constants";
 
 export default function AddNewUserDialog(props) {
   const wsClient = React.useContext(WsClientContext);
-  console.log(props.chat?.id);
+
   let oldUsers = useSelector((state) => state.chats.find((chat) => chat.id === props.chat?.id))?.users;
   const [lookupText, setLookupText] = React.useState("");
   const [checked, setChecked] = React.useState([]);

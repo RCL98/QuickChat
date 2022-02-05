@@ -7,6 +7,7 @@ import { InputAdornment, OutlinedInput } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { nanoid } from "@reduxjs/toolkit";
 import { messageAdded } from "../../reducers/messagesSlice";
+import { chatUpdateLastMessage } from "../../reducers/chatsSlice";
 
 import { WsClientContext } from "../../app/WsClientContext";
 
@@ -52,6 +53,7 @@ export default function NewMessageBox() {
         createdAt: timestamp,
       };
       dispatch(messageAdded(msg));
+      dispatch(chatUpdateLastMessage({ chatId: profile.currentChatId, message: msg }));
 
       if (wsClient && profile.currentChatId !== null) {
         const msgExt = {

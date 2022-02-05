@@ -9,4 +9,5 @@ import lombok.Setter;
 @Builder
 public class NotificationDTO {
     private Long chatId;
+    private MessageDTO message;
 }

@@ -9,7 +9,13 @@ import {
   usernameUpdated,
   currentyWritingUpdated,
 } from "../reducers/usersSlice";
-import { chatAdded, chatNameUpdated, chatNewNotification, chatPhotoUpdated } from "../reducers/chatsSlice";
+import {
+  chatAdded,
+  chatNameUpdated,
+  chatNewNotification,
+  chatPhotoUpdated,
+  chatUpdateLastMessage,
+} from "../reducers/chatsSlice";
 import { currentChatChanged, sessionIdChanged, userIdChanged } from "../reducers/profileSlice";
 
 import * as constants from "./constants";
@@ -119,7 +125,9 @@ const messageFilter = async (message) => {
           break;
 
         case constants.UPDATE_CHAT_USER:
+          // console.log("update user chat");
           store.dispatch(usernameUpdated(generalMessage.content));
+          store.dispatch(chatUpdateLastMessage(generalMessage.content));
           break;
 
         case constants.UPDATE_WHO_IS_WRITING:

@@ -1,6 +1,7 @@
 import React from "react";
 
 import List from "@mui/material/List";
+import Divider from "@mui/material/Divider";
 
 import { useSelector } from "react-redux";
 
@@ -30,15 +31,17 @@ export default function ChatsList(props) {
           {renderedChats.map((chat, index) => {
             const labelId = `chat-list-label-${index}`;
             return (
-              <ChatBoxItem
-                key={chat.id}
-                chat={chat}
-                labelId={labelId}
-                dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
-                dialogPhoto={{ value: openPhotoDialog, setter: setOpenPhotoDialog }}
-                dialogAddUsers={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }}
-                setChosenChat={setChosenChat}
-              />
+              <div key={chat.id}>
+                <ChatBoxItem
+                  chat={chat}
+                  labelId={labelId}
+                  dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
+                  dialogPhoto={{ value: openPhotoDialog, setter: setOpenPhotoDialog }}
+                  dialogAddUsers={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }}
+                  setChosenChat={setChosenChat}
+                />
+                <Divider variant="inset" component="li" />
+              </div>
             );
           })}
         </List>
