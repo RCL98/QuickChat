@@ -90,8 +90,15 @@ export default function GroupDetailsDialog(props) {
               sx={{ height: "15%" }}
               fullWidth
               value={props.groupName.value}
+              autoFocus
               variant="outlined"
               onChange={handleNameChange}
+              onKeyPress={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  handleAccept();
+                }
+              }}
               startAdornment={
                 <InputAdornment position="start">
                   <SupervisedUserCircleIcon fontSize="small" />
@@ -155,8 +162,8 @@ export default function GroupDetailsDialog(props) {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleClose}>Ok</Button>
           <Button onClick={handleAccept}>Accept</Button>
+          <Button onClick={handleClose}>Close</Button>
         </DialogActions>
       </Dialog>
       <AlertDialog

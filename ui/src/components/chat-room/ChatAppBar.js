@@ -17,7 +17,7 @@ export default function ChatAppBar() {
   if (chat === undefined) chat = { name: "You" };
 
   const renderUsers = () => {
-    if (chat.type !== CONVERSATION && users.length > 0)
+    if (chat.type !== CONVERSATION && users.length > 0) {
       if (users.length <= 3)
         return (
           <Typography variant="body1">
@@ -34,8 +34,11 @@ export default function ChatAppBar() {
               .join(", ") + ", ..."}
           </Typography>
         );
-    else if (users.length > 0 && users[0].isWriting)
-      return <Typography variant="body1">{`${users[0].name} is typing`}</Typography>;
+    } else if (users.length > 0) {
+      if (users[0].isWriting) return <Typography variant="body1">{`${users[0].name} is typing`}</Typography>;
+      return null;
+    }
+
     return chat.type === CONVERSATION ? (
       <Typography variant="body1"> The other user left the conversation </Typography>
     ) : (

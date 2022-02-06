@@ -161,7 +161,14 @@ export default function StartChatDialog(props) {
     }
   };
 
-  const handleStart = () => (props.option.value === "group" ? setOpenGroupDetails(true) : startChat());
+  const handleStart = () => {
+    if (props.option.value === "group") {
+      setGroupName("Group_" + Math.floor(10000 + Math.random() * 90000).toString());
+      setOpenGroupDetails(true);
+    } else {
+      startChat();
+    }
+  };
 
   const handleClose = () => {
     props.open.setter(false);
@@ -276,8 +283,10 @@ export default function StartChatDialog(props) {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleClose}>Ok</Button>
-          <Button onClick={handleStart}>Start</Button>
+          {/* <Button onClick={handleClose}>Ok</Button> */}
+          <Button onClick={handleStart} disabled={checked.length === 0}>
+            Start
+          </Button>
           <Button onClick={handleClose}>Close</Button>
         </DialogActions>
       </Dialog>
