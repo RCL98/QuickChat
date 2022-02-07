@@ -1,19 +1,16 @@
 package com.circ.quickchat.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import DTO.SimpleConversationDTO;
 import com.circ.quickchat.entity.Chat;
-import com.circ.quickchat.entity.Group;
+import com.circ.quickchat.entity.Conversation;
+import com.circ.quickchat.entity.User;
 import com.circ.quickchat.repositories.ChatRepository;
+import com.circ.quickchat.repositories.ConversationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.circ.quickchat.entity.Conversation;
-import com.circ.quickchat.entity.User;
-import com.circ.quickchat.repositories.ConversationRepository;
-
-import DTO.SimpleConversationDTO;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ConversationService {
@@ -37,10 +34,7 @@ public class ConversationService {
 	public void delete(Conversation conversation) {
 		userService.saveAll(
 				conversation.getChat().getUsers().stream()
-				.filter(usr -> usr.getCurrentChat() != null && usr.getCurrentChat().equals(conversation.getChat())).map(usr -> {
-					usr.setCurrentChat(null);
-					return usr;
-				}).collect(Collectors.toList()));
+				.filter(usr -> usr.getCurrentChat() != null && usr.getCurrentChat().equals(conversation.getChat())).peek(usr -> usr.setCurrentChat(null)).collect(Collectors.toList()));
 		conversationRepository.delete(conversation);
 	}
 	

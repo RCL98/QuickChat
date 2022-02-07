@@ -1,13 +1,10 @@
 package com.circ.quickchat.utils.communcation;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
 
-import com.circ.quickchat.entity.User;
+import java.util.List;
 
 @Component
 public class UserUtilCommun {
@@ -21,9 +18,7 @@ public class UserUtilCommun {
 	
 	public void sendToUsers(Object message, List<String> sessionsIds) {
 		if (sessionsIds != null) {
-			sessionsIds.forEach(id -> {
-				send.convertAndSendToUser(id, "/usertell", message);
-			});
+			sessionsIds.forEach(id -> send.convertAndSendToUser(id, "/usertell", message));
 		}
 	}
 

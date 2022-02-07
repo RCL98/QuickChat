@@ -37,21 +37,21 @@ public class UserService {
         for (Long userId :
                 usersIds) {
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new InternalError("It doesn't exist an user with" + " the id: " + userId));
+                    .orElseThrow(() -> new InternalError(String.format("A user with the id: %d doesn't exist.", userId)));
             chatAllert.addUserInChat(chat, user);
         }
         groupService.save(chat);
     }
 
     public Group addUsersInNewChat(Group group, List<Long> usersId) {
-        group.getChat().setUsers(new HashSet<User>());
+        group.getChat().setUsers(new HashSet<>());
         Group temporaryGroupDb = groupService.save(group);
         Set<User> users = getAllForIds(usersId);
+
         temporaryGroupDb.getChat().setUsers(users);
         temporaryGroupDb = groupService.save(temporaryGroupDb);
-        users.forEach(usr -> {
-            chatAllert.addUserInChatV2(group, usr);
-        });
+
+        users.forEach(usr -> chatAllert.addUserInChatV2(group, usr));
         return groupService.save(group);
     }
 
@@ -78,7 +78,7 @@ public class UserService {
 
     public List<UserDTO> getUsers(String sessionId) {
         return userRepository.findAll().stream().filter(user -> !user.getSessionId().equals(sessionId))
-                .map(user -> user.toUserDTO()).collect(Collectors.toList());
+                .map(User::toUserDTO).collect(Collectors.toList());
     }
 
     public void saveAll(Collection<User> users) {
@@ -86,17 +86,16 @@ public class UserService {
     }
 
     public Set<User> getAllForIds(List<Long> ids) {
-        return userRepository.findAllById(ids).stream()
-                .collect(Collectors.toSet());
+        return new HashSet<>(userRepository.findAllById(ids));
     }
 
     public User getUserForId(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new InternalError("Doesn exist an user with thid id!"));
     }
 
-    public List<String> getAllUsersSessionIdsByIds(List<Long> ids) {
-        return userRepository.findAllById(ids).stream().map(usr -> usr.getSessionId())
-                .collect(Collectors.toList());
-    }
+//    public List<String> getAllUsersSessionIdsByIds(List<Long> ids) {
+//        return userRepository.findAllById(ids).stream().map(usr -> usr.getSessionId())
+//                .collect(Collectors.toList());
+//    }
 
 }

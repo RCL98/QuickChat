@@ -46,7 +46,6 @@ export default function ChatBoxItem(props) {
   const handleMenuAddUsers = (event) => {
     setContextMenu(null);
     props.setChosenChat(props.chat);
-    console.log(props.dialogAddUsers.value);
     props.dialogAddUsers.setter(true);
   };
 

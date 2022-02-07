@@ -7,11 +7,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
-import { Button, InputAdornment, OutlinedInput, Avatar, ButtonGroup } from "@mui/material";
+import { Button, InputAdornment, OutlinedInput, Avatar, ButtonGroup, IconButton } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
 
 import { useSelector } from "react-redux";
 
@@ -74,6 +75,18 @@ export default function GroupDetailsDialog(props) {
       >
         <DialogTitle style={{ cursor: "move" }} id="draggable-chat-details-dialog-title">
           Group Details
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
 
         <DialogContent

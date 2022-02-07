@@ -8,6 +8,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { Button, InputAdornment, OutlinedInput, Typography, Box, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
+import CloseIcon from "@mui/icons-material/Close";
 
 import UsersListCheck from "./UsersListCheck";
 import GroupDetailsDialog from "./GroupDetailsDialog";
@@ -196,6 +197,18 @@ export default function StartChatDialog(props) {
       >
         <DialogTitle style={{ cursor: "move" }} id="draggable-start-chat-dialog-title">
           Start a chat
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
 
         <DialogContent id="start-chat-dialog-context" sx={{ overflow: "hidden", height: "100%" }}>
@@ -283,7 +296,6 @@ export default function StartChatDialog(props) {
         </DialogContent>
 
         <DialogActions>
-          {/* <Button onClick={handleClose}>Ok</Button> */}
           <Button onClick={handleStart} disabled={checked.length === 0}>
             Start
           </Button>

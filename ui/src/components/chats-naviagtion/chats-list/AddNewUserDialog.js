@@ -7,6 +7,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Button, InputAdornment, OutlinedInput, Typography, Box, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 import UsersListCheck from "../start-chats-navigation/UsersListCheck";
@@ -22,7 +23,6 @@ import { serverHost } from "../../../app/constants";
 export default function AddNewUserDialog(props) {
   const wsClient = React.useContext(WsClientContext);
 
-  let oldUsers = useSelector((state) => state.chats.find((chat) => chat.id === props.chat?.id))?.users;
   const [lookupText, setLookupText] = React.useState("");
   const [checked, setChecked] = React.useState([]);
   const [users, setUsers] = React.useState([]);
@@ -48,9 +48,18 @@ export default function AddNewUserDialog(props) {
   const getUsersList = () => {
     if (props.open.value) {
       axios
-        .get(serverHost + `/users/${sessionId}`)
+        .get(serverHost + `/groups/get-users/${props.chat.id}/user/${sessionId}`)
         .then(function (response) {
-          getUsersAvatars(response.data);
+          let old_users = new Set(response.data);
+          axios
+            .get(serverHost + `/users/${sessionId}`)
+            .then(function (response) {
+              let newUsers = response.data.filter((user) => !old_users.has(user.id));
+              getUsersAvatars(newUsers);
+            })
+            .catch(function (error) {
+              console.error(error);
+            });
         })
         .catch(function (error) {
           console.error(error);
@@ -58,7 +67,7 @@ export default function AddNewUserDialog(props) {
     }
   };
 
-  React.useEffect(getUsersList, [props.open.value, sessionId]);
+  React.useEffect(getUsersList, [props.open.value, sessionId, props.chat?.id]);
 
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
@@ -74,7 +83,6 @@ export default function AddNewUserDialog(props) {
 
   const handleAddUsers = () => {
     if (wsClient) {
-      console.log(oldUsers);
       const payload = users
         .filter((user) => checked.indexOf(user.id) !== -1)
         .map((user) => {
@@ -82,6 +90,7 @@ export default function AddNewUserDialog(props) {
         });
       wsClient.send(`/groups/addUsers/${props.chat.id}`, {}, JSON.stringify(payload));
     }
+    setChecked([]);
     props.open.setter(false);
   };
 
@@ -112,6 +121,18 @@ export default function AddNewUserDialog(props) {
       >
         <DialogTitle style={{ cursor: "move" }} id="draggable-add-new-users-dialog-title">
           Start a chat
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
 
         <DialogContent id="add-new-users-dialog-context" sx={{ overflow: "hidden", height: "100%" }}>
@@ -195,7 +216,6 @@ export default function AddNewUserDialog(props) {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleClose}>Ok</Button>
           <Button onClick={handleClose}>Close</Button>
           <Button onClick={handleAddUsers}>Add</Button>
         </DialogActions>
