@@ -1,5 +1,7 @@
 package com.circ.quickchat.entity;
 
+import java.util.stream.Collectors;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,8 +50,8 @@ public class Group {
 	}
 	
 	public GroupDTO toGroupDTO() {
-		return GroupDTO.builder()
-				.id(id).name(name).users(chat.getUsers())
+		return GroupDTO.builder().id(id).name(name)
+				.users(chat.getUsers().stream().map(usr -> usr.toUserDTO()).collect(Collectors.toSet()))
 				.messages(chat.getMessages()).build();
 	}
 	

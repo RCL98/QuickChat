@@ -52,10 +52,7 @@ public class ConnHandler extends WebSocketHandlerDecorator {
 				if (group.getChat().getUsers().size() == 1) {
 					groupService.deleteGroup(group);
 				} else {
-					group.getChat().setUsers(group.getChat().getUsers().stream().filter(usr -> !usr.getId().equals(user.getId()))
-							.collect(Collectors.toSet()));
-					chatAllert.deleteUserInChat(group, user);
-					groupService.save(group);
+					groupService.deleteUserInGroup(group, user);
 				}
 			});
 		}

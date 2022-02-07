@@ -19,25 +19,26 @@ import com.circ.quickchat.entity.Photo;
 import com.circ.quickchat.entity.User;
 import com.circ.quickchat.repositories.ChatRepository;
 import com.circ.quickchat.repositories.GroupRepository;
+import com.circ.quickchat.utils.Alerts.ChatAllert;
 import com.circ.quickchat.utils.communcation.UserUtilCommun;
 import com.circ.quickchat.websocket.WebsocketMessage;
 
 import constant.MessageType;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class GroupService {
 
-    @Autowired
-    private UserUtilCommun userUtilCommun;
+    private final UserUtilCommun userUtilCommun;
 
-    @Autowired
-    private GroupRepository groupRepository;
+    private final GroupRepository groupRepository;
 
-    @Autowired
-    private ChatRepository chatRepository;
+    private final ChatRepository chatRepository;
+    
+    private final ChatAllert chatAllert;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Transactional
     public void sendMessage(Message message, String sessionIdAuthor) {
@@ -99,5 +100,12 @@ public class GroupService {
             deleteFile.delete();
         }
         groupRepository.delete(group);
+    }
+    
+    public void deleteUserInGroup(Group group, User user) {
+		group.getChat().setUsers(group.getChat().getUsers().stream().filter(usr -> !usr.getId().equals(user.getId()))
+				.collect(Collectors.toSet()));
+		chatAllert.deleteUserInChat(group, user);
+		save(group);
     }
 }
