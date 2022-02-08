@@ -28,7 +28,7 @@ public class UserAllert {
 	public void updateUser(User user) {
 		List<Chat> chats = chatService.getChatsThatContainUser(user);
 		List<String> listUserSessionsId = chats.stream().flatMap(chat -> chat.getUsers().stream()
-			.filter(userC -> userC.getCurrentChat() != null && userC.getCurrentChat().equals(chat))
+//			.filter(userC -> userC.getCurrentChat() != null && userC.getCurrentChat().equals(chat))
 			.map(User::getSessionId)).collect(Collectors.toList());
 		userUtilCommun.sendToUsers(WebsocketMessage.builder()
 				.messageType(MessageType.UPDATE_CHAT_USER).content(user.toUserDTO()).build(), listUserSessionsId);

@@ -6,9 +6,6 @@ const messagesSlice = createSlice({
   name: "messages",
   initialState,
   reducers: {
-    clearMessageList(_state, _action) {
-      return [];
-    },
     updateMessagesList(state, action) {
       return action.payload;
     },
@@ -18,6 +15,6 @@ const messagesSlice = createSlice({
   },
 });
 
-export const { updateMessagesList, messageAdded, clearMessageList } = messagesSlice.actions;
+export const { updateMessagesList, messageAdded } = messagesSlice.actions;
 
 export default messagesSlice.reducer;

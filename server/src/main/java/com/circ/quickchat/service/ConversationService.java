@@ -6,23 +6,24 @@ import com.circ.quickchat.entity.Conversation;
 import com.circ.quickchat.entity.User;
 import com.circ.quickchat.repositories.ChatRepository;
 import com.circ.quickchat.repositories.ConversationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.circ.quickchat.utils.Alerts.ChatAlert;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class ConversationService {
-	
-	@Autowired
-	private ConversationRepository conversationRepository;
 
-	@Autowired
-	private ChatRepository chatRepository;
+	private final ConversationRepository conversationRepository;
 
-	@Autowired
-	private UserService userService;
+	private final ChatRepository chatRepository;
+
+	private final UserService userService;
+
+	private final ChatAlert chatAlert;
 
 	public Conversation save(Conversation conversation) {
 		Chat chatDb = chatRepository.save(conversation.getChat());
@@ -42,7 +43,7 @@ public class ConversationService {
 		return conversationRepository.findById(id).orElseThrow(() -> new InternalError("it doesn't exist a conversation with this id!"));
 	}
 
-	public List<Conversation> getChatThatContainsUser(User user) {
+	public List<Conversation> getConversationThatContainsUser(User user) {
 		return conversationRepository.findAll()
 				.stream().filter(conv -> conv.getChat().getUsers().stream()
 						.anyMatch(usr -> usr.getId().equals(user.getId())))
@@ -58,6 +59,17 @@ public class ConversationService {
 		.findAny().orElseThrow(() -> new InternalError("User that want to change name isn't into conversation"))
 		.setName(simpleConversationDTO.getName());
 		conversationRepository.save(conversation);
+	}
+
+	public void  deleteUserInConversation(Conversation conversation, User user) {
+		if (conversation.getChat().getUsers().size() == 1) {
+			delete(conversation);
+		} else {
+			conversation.getChat().setUsers(conversation.getChat().getUsers().stream().filter(usr -> !usr.getId().equals(user.getId()))
+					.collect(Collectors.toSet()));
+			chatAlert.deleteUserInChat(conversation.getId(), conversation.getChat(), user);
+			save(conversation);
+		}
 	}
 	
 	public List<Conversation> findAll() {

@@ -23,6 +23,6 @@ public class ConversationDTO {
 	@Builder.Default
 	private ChatTypes type = ChatTypes.CONVERSATION;
 
-	private List<Message> messages;
+	private List<MessageDTO> messages;
 	private Set<User> users;
 }

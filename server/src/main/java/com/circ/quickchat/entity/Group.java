@@ -1,23 +1,14 @@
 package com.circ.quickchat.entity;
 
-import java.util.stream.Collectors;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
 import DTO.GroupDTO;
+import DTO.PushedOutOfGroupDTO;
 import DTO.SimpleGroupDTO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+import javax.persistence.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -52,8 +43,11 @@ public class Group {
 	public GroupDTO toGroupDTO() {
 		return GroupDTO.builder().id(id).name(name)
 				.users(chat.getUsers().stream().map(usr -> usr.toUserDTO()).collect(Collectors.toSet()))
-				.messages(chat.getMessages()).build();
+				.messages(chat.getMessages().stream().map(Message::toMessageDTO).collect(Collectors.toList())).build();
 	}
-	
-	
+
+	public PushedOutOfGroupDTO toPushedOutOfGroupDTO() {
+		return PushedOutOfGroupDTO.builder().id(chat.getId()).name(name).build();
+	}
+
 }

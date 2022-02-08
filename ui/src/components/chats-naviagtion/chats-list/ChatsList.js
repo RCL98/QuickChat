@@ -8,12 +8,16 @@ import { useSelector } from "react-redux";
 import ChatBoxItem from "./ChatBoxItem";
 import ChangeGroupPhotoDialog from "./ChangeGroupPhotoDialog";
 import ChangeChatNameDialog from "./ChangeChatNameDialog";
-import AddNewUserDialog from "./AddNewUserDialog";
+import AddNewUsersDialog from "./AddNewUsersDialog";
+import GetOutOfChatDialog from "./GetOutOfChatDialog";
+import PushUsersOutDialog from "./PushUserOutDialog";
 
 export default function ChatsList(props) {
   const [openNameDialog, setOpenNameDialog] = React.useState(false);
   const [openPhotoDialog, setOpenPhotoDialog] = React.useState(false);
   const [openAddUsersDialog, setOpenAddUsersDialog] = React.useState(false);
+  const [openGetOutDialog, setOpenGetOutDialog] = React.useState(false);
+  const [openPushOutDialog, setOpenPushOutDialog] = React.useState(false);
 
   const [chosenChat, setChosenChat] = React.useState(null);
 
@@ -38,6 +42,8 @@ export default function ChatsList(props) {
                   dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
                   dialogPhoto={{ value: openPhotoDialog, setter: setOpenPhotoDialog }}
                   dialogAddUsers={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }}
+                  dialogGetOut={{ value: openGetOutDialog, setter: setOpenGetOutDialog }}
+                  dialogPushOut={{ value: openPushOutDialog, setter: setOpenPushOutDialog }}
                   setChosenChat={setChosenChat}
                 />
                 <Divider variant="inset" component="li" />
@@ -47,7 +53,9 @@ export default function ChatsList(props) {
         </List>
         <ChangeChatNameDialog chat={chosenChat} open={{ value: openNameDialog, setter: setOpenNameDialog }} />
         <ChangeGroupPhotoDialog chat={chosenChat} open={{ value: openPhotoDialog, setter: setOpenPhotoDialog }} />
-        <AddNewUserDialog chat={chosenChat} open={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }} />
+        <AddNewUsersDialog chat={chosenChat} open={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }} />
+        <GetOutOfChatDialog chat={chosenChat} open={{ value: openGetOutDialog, setter: setOpenGetOutDialog }} />
+        <PushUsersOutDialog chat={chosenChat} open={{ value: openPushOutDialog, setter: setOpenPushOutDialog }} />
       </div>
     );
   };

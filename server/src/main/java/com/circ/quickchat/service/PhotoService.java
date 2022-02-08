@@ -123,7 +123,7 @@ public class PhotoService {
 				.content(groupId).messageType(MessageType.UPDATE_GROUP_PHOTO)
 				.build();
 		userUtilCommun.sendToUsers(websocketMessage, group.getChat().getUsers()
-				.stream().map(usr -> usr.getSessionId())
+				.stream().map(User::getSessionId)
 				.filter(filSessionId -> !filSessionId.equals(sessionId))
 				.collect(Collectors.toList()));
 	}

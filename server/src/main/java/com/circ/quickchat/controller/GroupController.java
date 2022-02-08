@@ -42,22 +42,34 @@ public class GroupController {
 		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
 		User user = userService.getUserBySessionId(sessionId);
 		message = message.toBuilder().authorId(user.getId()).authorName(user.getName()).build();
+//		if (message.getChat().getUsers().stream().noneMatch(usr-> usr.getId().equals(user.getId()))) {
+//			throw new InternalError(String.format("User %d that tries to send message in group %d doesn't belong to it!",
+//					user.getId(), message.getChat().getId()));
+//		}
 		groupService.sendMessage(message, sessionId);
 	}
 	
-	@MessageMapping("/groups/getmeout/{groupId}")
+	@MessageMapping("/groups/get-out/{groupId}")
 	public void getMeOutOfGroup(@DestinationVariable Long groupId, SimpMessageHeaderAccessor headerAccessor) {
-		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
 		User user = userService.getUserBySessionId(sessionId);
 		Group group = groupService.getGroupById(groupId);
 		groupService.deleteUserInGroup(group, user);
 	}
 	
-	@MessageMapping("/group/getoutuser/{groupId}/user/{userId}")
-	public void getOutUser(@DestinationVariable Long groupId, @DestinationVariable Long userId) {
-		User user = userService.getUserForId(userId);
+	@MessageMapping("/groups/push-users-out/{groupId}")
+	public void getOutUsers(@DestinationVariable Long groupId, @Payload List<Long> users, SimpMessageHeaderAccessor  headerAccessor) {
 		Group group = groupService.getGroupById(groupId);
-		groupService.deleteUserInGroup(group, user);
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
+		User user = userService.getUserBySessionId(sessionId);
+		if (group.getChat().getUsers().stream().noneMatch(usr -> usr.getId().equals(user.getId()))) {
+			throw new InternalError("User " + user.getId() + " that tries to add another user isn't in this group!");
+		}
+		for (Long userId: users
+			 ) {
+			groupService.removeUserFromGroup(group, userService.getUserForId(userId));
+		}
+
 	}
 	
 	@PostMapping("/groups/create/{sessionId}")
@@ -82,8 +94,8 @@ public class GroupController {
 		userService.addUsersInChat(group, users);
 	}
 
-	@GetMapping("/groups/get-users/{groupId}/user/{sessionId}")
-	public Set<Long> getUsersOfGroup(@PathVariable Long groupId, @PathVariable String sessionId) {
+	@GetMapping("/groups/get-users-ids/{groupId}/user/{sessionId}")
+	public Set<Long> getUsersIdsOfGroup(@PathVariable Long groupId, @PathVariable String sessionId) {
 		Group group = groupService.getGroupById(groupId);
 		Long requestingUserId = userService.getUserBySessionId(sessionId).getId();
 		Set<User> groupUsers = group.getChat().getUsers();
@@ -100,11 +112,26 @@ public class GroupController {
 		return usersIds;
 	}
 
+	@GetMapping("/groups/get-users/{groupId}/user/{sessionId}")
+	public Set<User> getUsersOfGroup(@PathVariable Long groupId, @PathVariable String sessionId) {
+		Group group = groupService.getGroupById(groupId);
+		Long requestingUserId = userService.getUserBySessionId(sessionId).getId();
+		Set<User> groupUsers = group.getChat().getUsers();
+		if (group.getChat().getUsers().stream().noneMatch(usr -> usr.getId().equals(requestingUserId))) {
+			throw new InternalError("User " + requestingUserId + " that tries to add another user isn't in this group!");
+		}
+		return groupUsers;
+	}
+
 	@MessageMapping("/groups/get/{groupId}/user/{sessionId}")
 	@Transactional
 	public void getGroup(@DestinationVariable String sessionId, @DestinationVariable Long groupId) {
 		Group group = groupService.getGroupById(groupId);
 		User user = userService.getUserBySessionId(sessionId);
+		if (group.getChat().getUsers().stream().noneMatch(usr-> usr.getId().equals(user.getId()))) {
+			throw new InternalError(String.format("User %d that tries to access group %d doesn't belong to it!",
+					user.getId(), group.getId()));
+		}
 		user.setCurrentChat(group.getChat());
 		userService.save(user);
 		userUtilCommun.sendToUser(sessionId, WebsocketMessage.builder().messageType(MessageType.REQUESTED_CHAT)
@@ -118,14 +145,14 @@ public class GroupController {
 		User userThatUpdateGroup = userService.getUserBySessionId(sessionId);
 		if (group.getChat().getUsers().stream()
 				.noneMatch(usr -> usr.getId().equals(userThatUpdateGroup.getId()))) {
-			throw new InternalError("User that try to change name for group isn't into group!");
+			throw new InternalError("User that tries to change name for group isn't into group!");
 		}
 		group.setName(simpleGroupDTO.getName());
 		groupService.save(group);
 		WebsocketMessage websocketMessage = WebsocketMessage.builder()
 				.messageType(MessageType.UPDATE_GROUP_NAME).content(group.toSimpleGroupDTO()).build();
 		userUtilCommun.sendToUsers(websocketMessage, group.getChat().getUsers().stream()
-				.map(usr -> usr.getSessionId()).filter(id -> !id.equals(sessionId))
+				.map(User::getSessionId).filter(id -> !id.equals(sessionId))
 				.collect(Collectors.toList()));
 	}
 	

@@ -6,7 +6,7 @@ const usersSlice = createSlice({
   name: "users",
   initialState,
   reducers: {
-    usersListUpdated(state, action) {
+    usersListUpdated(_state, action) {
       return action.payload;
     },
     userAdded(state, action) {

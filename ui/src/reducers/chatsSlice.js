@@ -25,15 +25,16 @@ const chatsSlice = createSlice({
       return state.map((obj) => (obj.id === action.payload.chatId ? { ...obj, notifications: 0 } : obj));
     },
     chatUpdateLastMessage(state, action) {
-      console.log("updating last message", action.payload);
+      console.log(action.payload);
       if (action.payload.hasOwnProperty("message")) {
+        console.log("has message field");
         return state.map((chat) =>
           chat.id === action.payload.chatId ? { ...chat, lastMessage: action.payload.message } : chat
         );
       } else {
         return state.map((chat) =>
           chat.lastMessage.authorId === action.payload.id
-            ? { ...chat, lastMessage: { ...chat.lastMessage, name: action.payload.name } }
+            ? { ...chat, lastMessage: { ...chat.lastMessage, authorName: action.payload.name } }
             : chat
         );
       }

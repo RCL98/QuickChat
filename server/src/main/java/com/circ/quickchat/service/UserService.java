@@ -14,7 +14,7 @@ import com.circ.quickchat.entity.Group;
 import com.circ.quickchat.entity.Photo;
 import com.circ.quickchat.entity.User;
 import com.circ.quickchat.repositories.UserRepository;
-import com.circ.quickchat.utils.Alerts.ChatAllert;
+import com.circ.quickchat.utils.Alerts.ChatAlert;
 
 import DTO.UserDTO;
 
@@ -28,7 +28,7 @@ public class UserService {
     private GroupService groupService;
 
     @Autowired
-    private ChatAllert chatAllert;
+    private ChatAlert chatAlert;
 
     @Autowired
     private ConversationInfoService chaConversationInfoService;
@@ -38,7 +38,9 @@ public class UserService {
                 usersIds) {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new InternalError(String.format("A user with the id: %d doesn't exist.", userId)));
-            chatAllert.addUserInChat(chat, user);
+
+            chatAlert.addUserInChat(chat, user);
+            chat.getChat().getUsers().add(user);
         }
         groupService.save(chat);
     }
@@ -49,9 +51,8 @@ public class UserService {
         Set<User> users = getAllForIds(usersId);
 
         temporaryGroupDb.getChat().setUsers(users);
-        temporaryGroupDb = groupService.save(temporaryGroupDb);
 
-        users.forEach(usr -> chatAllert.addUserInChatV2(group, usr));
+        users.forEach(usr -> chatAlert.addUserInChat(group, usr));
         return groupService.save(group);
     }
 
@@ -92,10 +93,5 @@ public class UserService {
     public User getUserForId(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new InternalError("Doesn exist an user with thid id!"));
     }
-
-//    public List<String> getAllUsersSessionIdsByIds(List<Long> ids) {
-//        return userRepository.findAllById(ids).stream().map(usr -> usr.getSessionId())
-//                .collect(Collectors.toList());
-//    }
 
 }

@@ -1,11 +1,9 @@
 package com.circ.quickchat.controller;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import com.circ.quickchat.utils.Alerts.ChatAllert;
+import com.circ.quickchat.entity.*;
+import com.circ.quickchat.utils.Alerts.ChatAlert;
 import com.circ.quickchat.utils.communcation.UserUtilCommun;
 import com.circ.quickchat.websocket.WebsocketMessage;
 import constant.MessageType;
@@ -15,11 +13,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.*;
 
-import com.circ.quickchat.entity.Chat;
-import com.circ.quickchat.entity.Conversation;
-import com.circ.quickchat.entity.ConversationInfo;
-import com.circ.quickchat.entity.Message;
-import com.circ.quickchat.entity.User;
 import com.circ.quickchat.service.ConversationService;
 import com.circ.quickchat.service.UserService;
 
@@ -40,13 +33,13 @@ public class ConversationController {
 	private UserUtilCommun userUtilCommun;
 
 	@Autowired
-	private ChatAllert chatAllert;
+	private ChatAlert chatAlert;
 	
 	@PostMapping("/conversations/create/{sessionId}/{partnerId}")
 	public SimpleConversationDTO createConversation(@RequestBody ConversationInfo conversationInfo, 
 			@PathVariable String sessionId, @PathVariable Long partnerId) {
-		Set<User> userSet = new HashSet<User>();
-		List<ConversationInfo> info = new ArrayList<ConversationInfo>();
+		Set<User> userSet = new HashSet<>();
+		List<ConversationInfo> info = new ArrayList<>();
 		User userThatCreatedConv = userService.getUserBySessionId(sessionId);
 		conversationInfo.setUserId(userThatCreatedConv.getId());
 		info.add(conversationInfo);
@@ -54,10 +47,10 @@ public class ConversationController {
 		userSet.add(userThatCreatedConv);
 		User anotherUser = userService.getUserForId(partnerId);
 		userSet.add(anotherUser);
-		Chat newChat = Chat.builder().users(userSet).messages(new ArrayList<Message>()).build();
+		Chat newChat = Chat.builder().users(userSet).messages(new ArrayList<>()).build();
 		Conversation conversation = conversationService.save(Conversation.builder().chat(newChat)
 				.conversationsInfo(info).build());
-		chatAllert.addUserInConversation(conversation, anotherUser);
+		chatAlert.addUserInConversation(conversation, anotherUser);
 		return conversation.toSimpleConversationDTO(userThatCreatedConv.getId());
 	}
 	
@@ -74,8 +67,16 @@ public class ConversationController {
 	
 	@MessageMapping("/conversations/change-name")
 	public void updateConversation(SimpleConversationDTO simpleConversationDTO, SimpMessageHeaderAccessor headerAccessor) {
-		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
 		conversationService.updateConversationForUser(sessionId, simpleConversationDTO);
+	}
+
+	@MessageMapping("/conversations/get-out/{convId}")
+	public void getMeOutOfConversation(@DestinationVariable Long convId, SimpMessageHeaderAccessor headerAccessor) {
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
+		User user = userService.getUserBySessionId(sessionId);
+		Conversation conversation = conversationService.findById(convId);
+		conversationService.deleteUserInConversation(conversation, user);
 	}
 	
 }

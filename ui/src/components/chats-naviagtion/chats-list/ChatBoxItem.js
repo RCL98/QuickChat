@@ -49,6 +49,18 @@ export default function ChatBoxItem(props) {
     props.dialogAddUsers.setter(true);
   };
 
+  const handleMenuGetOut = () => {
+    setContextMenu(null);
+    props.setChosenChat(props.chat);
+    props.dialogGetOut.setter(true);
+  };
+
+  const handleMenuPushOut = () => {
+    setContextMenu(null);
+    props.setChosenChat(props.chat);
+    props.dialogPushOut.setter(true);
+  };
+
   const handleMenuChangeChatName = (event) => {
     setContextMenu(null);
     props.setChosenChat(props.chat);
@@ -135,25 +147,30 @@ export default function ChatBoxItem(props) {
           </div>
         </Stack>
       </ListItemSecondaryAction>
-
-      <Menu
-        open={contextMenu !== null}
-        onClose={handleCloseMenu}
-        anchorReference="anchorPosition"
-        anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
-      >
-        <MenuItem onClick={handleMenuChangeChatName}>
-          {props.chat.type === CONVERSATION
-            ? `Change conversation's ${props.chat.name} name`
-            : `Change group's ${props.chat.name} name`}
-        </MenuItem>
-        {props.chat.type !== CONVERSATION ? (
+      {props.chat.type === CONVERSATION ? (
+        <Menu
+          open={contextMenu !== null}
+          onClose={handleCloseMenu}
+          anchorReference="anchorPosition"
+          anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+        >
+          <MenuItem onClick={handleMenuGetOut}>Get out of this conversation</MenuItem>
+          <MenuItem onClick={handleMenuChangeChatName}>{`Change conversation's ${props.chat.name} name`}</MenuItem>
+        </Menu>
+      ) : (
+        <Menu
+          open={contextMenu !== null}
+          onClose={handleCloseMenu}
+          anchorReference="anchorPosition"
+          anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+        >
+          <MenuItem onClick={handleMenuGetOut}>Get out of this group</MenuItem>
+          <MenuItem onClick={handleMenuAddUsers}>Add new users to group</MenuItem>
+          <MenuItem onClick={handleMenuPushOut}>Delete users from group</MenuItem>
+          <MenuItem onClick={handleMenuChangeChatName}>{`Change group's ${props.chat.name} name`}</MenuItem>
           <MenuItem onClick={handleMenuChangeGroupPhoto}>{`Change group's ${props.chat.name} photo`}</MenuItem>
-        ) : null}
-        {props.chat.type !== CONVERSATION ? (
-          <MenuItem onClick={handleMenuAddUsers}>Add new user to chat</MenuItem>
-        ) : null}
-      </Menu>
+        </Menu>
+      )}
     </ListItemButton>
   );
 }

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 
 import store from "./store";
-import { updateMessagesList, messageAdded, clearMessageList } from "../reducers/messagesSlice";
+import { updateMessagesList, messageAdded } from "../reducers/messagesSlice";
 import {
   usersListUpdated,
   userAdded,
@@ -11,6 +11,7 @@ import {
 } from "../reducers/usersSlice";
 import {
   chatAdded,
+  chatDeleted,
   chatNameUpdated,
   chatNewNotification,
   chatPhotoUpdated,
@@ -49,6 +50,12 @@ const messageFilter = async (message) => {
       switch (generalMessage.messageType) {
         case constants.MESSAGE:
           store.dispatch(messageAdded(generalMessage.content));
+          store.dispatch(
+            chatUpdateLastMessage({
+              chatId: store.getState().profile.currentChatId,
+              message: generalMessage.content,
+            })
+          );
           break;
 
         case constants.NOTIFICATION:
@@ -109,7 +116,7 @@ const messageFilter = async (message) => {
           break;
 
         case constants.REQUESTED_CHAT:
-          store.dispatch(clearMessageList());
+          store.dispatch(updateMessagesList([]));
           const users = await getUsersAvatars(generalMessage.content.users);
           store.dispatch(usersListUpdated(users));
           store.dispatch(updateMessagesList(generalMessage.content.messages));
@@ -124,8 +131,17 @@ const messageFilter = async (message) => {
           store.dispatch(userDeleted(generalMessage.content.user));
           break;
 
+        case constants.PUSHED_USER_OUT:
+          if (store.getState().profile.currentChatId === generalMessage.content.id) {
+            store.dispatch(usersListUpdated([]));
+            store.dispatch(updateMessagesList([]));
+            store.dispatch(currentChatChanged({ id: null, type: constants.GROUP }));
+          }
+          store.dispatch(chatDeleted(generalMessage.content));
+          alert(`You were pushet out of group ${generalMessage.content.name}`);
+          break;
+
         case constants.UPDATE_CHAT_USER:
-          // console.log("update user chat");
           store.dispatch(usernameUpdated(generalMessage.content));
           store.dispatch(chatUpdateLastMessage(generalMessage.content));
           break;

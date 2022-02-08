@@ -21,6 +21,6 @@ public class GroupDTO {
 	@Builder.Default
 	private ChatTypes type = ChatTypes.GROUP;
 
-	private List<Message> messages;
+	private List<MessageDTO> messages;
 	private Set<UserDTO> users;
 }
