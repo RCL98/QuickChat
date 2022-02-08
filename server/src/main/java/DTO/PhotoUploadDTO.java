@@ -12,8 +12,5 @@ import lombok.experimental.SuperBuilder;
 public class PhotoUploadDTO {
 	private MultipartFile file;
 	private String userSessionId;
-	
-	public PhotoUploadDTO() {
-		
-	}
+
 }

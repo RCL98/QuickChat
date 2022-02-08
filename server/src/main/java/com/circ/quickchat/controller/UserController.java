@@ -1,6 +1,7 @@
 package com.circ.quickchat.controller;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class UserController {
 	
 	@MessageMapping("/user/change/name")
 	public void processChangeUserName(String newName, SimpMessageHeaderAccessor  headerAccessor) {
-		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
 		User user = userService.getUserBySessionId(sessionId);
 		user.setName(newName);
 		User newUser = userService.save(user);

@@ -1,5 +1,6 @@
 package com.circ.quickchat.controller;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class WriterController {
 	}
 	
 	private void alertUserWriteAction(SimpMessageHeaderAccessor headerAccessor, Boolean isWriting) {
-		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
 		User userThatWrite = userService.getUserBySessionId(sessionId);
 		Long chatId = userThatWrite.getCurrentChat().getId();
 		Chat chat = chatRepository.findById(chatId)

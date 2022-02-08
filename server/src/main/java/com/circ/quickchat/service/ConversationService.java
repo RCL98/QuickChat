@@ -35,7 +35,8 @@ public class ConversationService {
 	public void delete(Conversation conversation) {
 		userService.saveAll(
 				conversation.getChat().getUsers().stream()
-				.filter(usr -> usr.getCurrentChat() != null && usr.getCurrentChat().equals(conversation.getChat())).peek(usr -> usr.setCurrentChat(null)).collect(Collectors.toList()));
+				.filter(usr -> usr.getCurrentChat() != null && usr.getCurrentChat().equals(conversation.getChat()))
+						.map(usr -> {usr.setCurrentChat(null); return usr;}).collect(Collectors.toList()));
 		conversationRepository.delete(conversation);
 	}
 	

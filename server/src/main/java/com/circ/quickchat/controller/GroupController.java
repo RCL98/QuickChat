@@ -1,9 +1,11 @@
 package com.circ.quickchat.controller;
 
 import DTO.SimpleGroupDTO;
+import com.circ.quickchat.entity.Chat;
 import com.circ.quickchat.entity.Group;
 import com.circ.quickchat.entity.Message;
 import com.circ.quickchat.entity.User;
+import com.circ.quickchat.service.ChatService;
 import com.circ.quickchat.service.GroupService;
 import com.circ.quickchat.service.UserService;
 import com.circ.quickchat.utils.communcation.UserUtilCommun;
@@ -31,27 +33,34 @@ public class GroupController {
 	
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ChatService chatService;
 	
 	@Autowired
 	private UserUtilCommun userUtilCommun;
-	
+
+	private static final String SESSION_ID = "sessionId";
+
+	private static final String ERROR_USER = "User %d that tries to add another user isn't in this group!";
 
 	//endpoint for websocket client
 	@MessageMapping("/chat")
 	public void processMessage(Message message,  SimpMessageHeaderAccessor  headerAccessor) {
-		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get(SESSION_ID).toString();
 		User user = userService.getUserBySessionId(sessionId);
 		message = message.toBuilder().authorId(user.getId()).authorName(user.getName()).build();
-//		if (message.getChat().getUsers().stream().noneMatch(usr-> usr.getId().equals(user.getId()))) {
-//			throw new InternalError(String.format("User %d that tries to send message in group %d doesn't belong to it!",
-//					user.getId(), message.getChat().getId()));
-//		}
+		Chat chat = chatService.findChatById(message.getChat().getId());
+		if (chat.getUsers().stream().noneMatch(usr-> usr.getId().equals(user.getId()))) {
+			throw new InternalError(String.format("User %d that tries to send message in group %d doesn't belong to it!",
+					user.getId(), message.getChat().getId()));
+		}
 		groupService.sendMessage(message, sessionId);
 	}
 	
 	@MessageMapping("/groups/get-out/{groupId}")
 	public void getMeOutOfGroup(@DestinationVariable Long groupId, SimpMessageHeaderAccessor headerAccessor) {
-		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get(SESSION_ID).toString();
 		User user = userService.getUserBySessionId(sessionId);
 		Group group = groupService.getGroupById(groupId);
 		groupService.deleteUserInGroup(group, user);
@@ -60,10 +69,10 @@ public class GroupController {
 	@MessageMapping("/groups/push-users-out/{groupId}")
 	public void getOutUsers(@DestinationVariable Long groupId, @Payload List<Long> users, SimpMessageHeaderAccessor  headerAccessor) {
 		Group group = groupService.getGroupById(groupId);
-		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get(SESSION_ID).toString();
 		User user = userService.getUserBySessionId(sessionId);
 		if (group.getChat().getUsers().stream().noneMatch(usr -> usr.getId().equals(user.getId()))) {
-			throw new InternalError("User " + user.getId() + " that tries to add another user isn't in this group!");
+			throw new InternalError(String.format(ERROR_USER, user.getId()));
 		}
 		for (Long userId: users
 			 ) {
@@ -86,10 +95,10 @@ public class GroupController {
 	public void addUsersInChat(@DestinationVariable Long groupId, @Payload List<Long> users,
 			SimpMessageHeaderAccessor  headerAccessor) {
 		Group group = groupService.getGroupById(groupId);
-		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get(SESSION_ID).toString();
 		User user = userService.getUserBySessionId(sessionId);
 		if (group.getChat().getUsers().stream().noneMatch(usr -> usr.getId().equals(user.getId()))) {
-			throw new InternalError("User " + user.getId() + " that tries to add another user isn't in this group!");
+			throw new InternalError(String.format(ERROR_USER, user.getId()));
 		}
 		userService.addUsersInChat(group, users);
 	}
@@ -118,7 +127,7 @@ public class GroupController {
 		Long requestingUserId = userService.getUserBySessionId(sessionId).getId();
 		Set<User> groupUsers = group.getChat().getUsers();
 		if (group.getChat().getUsers().stream().noneMatch(usr -> usr.getId().equals(requestingUserId))) {
-			throw new InternalError("User " + requestingUserId + " that tries to add another user isn't in this group!");
+			throw new InternalError(String.format(ERROR_USER, requestingUserId));
 		}
 		return groupUsers;
 	}
@@ -140,7 +149,7 @@ public class GroupController {
 	
 	@MessageMapping("/groups/change-name")
 	public void updateGroup(SimpleGroupDTO simpleGroupDTO, SimpMessageHeaderAccessor  headerAccessor) {
-		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get(SESSION_ID).toString();
 		Group group = groupService.getGroupById(simpleGroupDTO.getId());
 		User userThatUpdateGroup = userService.getUserBySessionId(sessionId);
 		if (group.getChat().getUsers().stream()

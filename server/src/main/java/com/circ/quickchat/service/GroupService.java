@@ -1,6 +1,9 @@
 package com.circ.quickchat.service;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,11 +95,14 @@ public class GroupService {
         userService.saveAll(
                 group.getChat().getUsers().stream()
                         .filter(usr -> usr.getCurrentChat() != null && usr.getCurrentChat().equals(group.getChat()))
-                        .peek(usr -> usr.setCurrentChat(null)).collect(Collectors.toList()));
+                        .map(usr -> { usr.setCurrentChat(null); return usr; }).collect(Collectors.toList()));
         Photo photo = group.getPhoto();
         if (photo != null) {
-            File deleteFile = new File(photo.getBigPhotoUri());
-            deleteFile.delete();
+            try {
+                Files.delete(Path.of(photo.getBigPhotoUri()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         groupRepository.delete(group);
     }

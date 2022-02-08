@@ -31,7 +31,4 @@ public class ConversationInfo {
 	@Column(name = "chat_name")
 	private String name;
 
-	public ConversationInfo() {
-
-	}
 }

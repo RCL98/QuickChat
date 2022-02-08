@@ -19,15 +19,17 @@ public class NewConnInterceptor implements HandshakeInterceptor{
 	
 	@Autowired
 	private UserService userService;
+
+	private static final String SESSION_ID = "sessionId";
 	
 
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
 			Map<String, Object> attributes) throws Exception {
 		Map<String, String[]> queryParams = HttpUtils.parseQueryString(request.getURI().getQuery());
-		if (queryParams.containsKey("sessionId")) {
-			String sessionId = queryParams.get("sessionId")[0];
-			attributes.put("sessionId", sessionId);
+		if (queryParams.containsKey(SESSION_ID)) {
+			String sessionId = queryParams.get(SESSION_ID)[0];
+			attributes.put(SESSION_ID, sessionId);
 			userService.getUserBySessionId(sessionId);
 		}
 		return true;
@@ -37,18 +39,7 @@ public class NewConnInterceptor implements HandshakeInterceptor{
 	@Override
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
 			Exception exception) {
-		
+		// This is an obligatory override
 	}
-
-//	@Override
-//	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
-//			Exception exception) {
-//		Map<String, String[]> queryParams = HttpUtils.parseQueryString(request.getURI().getQuery());
-//		String sessionId = queryParams.get("sessionId")[0];
-//		sessionKeyToUser.get(sessionId).setId(UUID.randomUUID().toString());
-//		User newUser = sessionKeyToUser.get(sessionId);
-//		userAlert.connectNewUser(newUser);
-//		userService.addUserInChat(chats.get(ChatTypes.principalChatId), newUser.getId());
-//	}
 
 }

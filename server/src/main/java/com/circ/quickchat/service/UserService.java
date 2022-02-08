@@ -1,6 +1,9 @@
 package com.circ.quickchat.service;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -70,8 +73,11 @@ public class UserService {
         chaConversationInfoService.deleteAll(chaConversationInfoService.findAllByUserId(user.getId()));
         Photo photo = user.getPhoto();
         if (photo != null) {
-            File deleteFile = new File(photo.getBigPhotoUri());
-            deleteFile.delete();
+            try {
+                Files.delete(Path.of(photo.getBigPhotoUri()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         userRepository.deleteById(user.getId());
 
