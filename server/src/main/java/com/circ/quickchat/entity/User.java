@@ -53,7 +53,7 @@ public class User {
 	private List<Chat> chats;*/
 	
 	public User() {
-		
+		// Constructor is empty because use of Entity and SuperBuilder annotations
 	}
 	
 	public UserDTO toUserDTO() {

@@ -33,7 +33,7 @@ public class Group {
 	
 	
 	public Group() {
-		
+		// Constructor is empty because use of Entity and SuperBuilder annotations
 	}
 	
 	public SimpleGroupDTO toSimpleGroupDTO() {

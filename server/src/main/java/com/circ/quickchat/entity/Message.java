@@ -51,7 +51,7 @@ public class Message {
 	private String content;
 	
 	public Message() {
-		
+		// Constructor is empty because use of Entity and SuperBuilder annotations
 	}
 	
 	public MessageDTO toMessageDTO() {

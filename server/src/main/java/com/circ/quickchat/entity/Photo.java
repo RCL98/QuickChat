@@ -29,6 +29,6 @@ public class Photo {
 	private String jpegPhotoUri;
 	
 	public Photo() {
-		
+		// Constructor is empty because use of Entity and SuperBuilder annotations
 	}
 }
