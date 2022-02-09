@@ -43,6 +43,7 @@ public class User {
 	@JoinColumn(name = "current_chat_id")
 	@JsonIgnoreProperties({"users", "messages"})
 	private Chat currentChat;
+
 	
 	public User() {
 		// Constructor is empty because use of Entity and SuperBuilder annotations

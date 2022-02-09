@@ -31,9 +31,6 @@ public class Group {
 	@Column(name = "group_name")
 	private String name;
 
-	public Group() {
-		// Constructor is empty because use of Entity and SuperBuilder annotations
-	}
 
 	public SimpleGroupDTO toSimpleGroupDTO() {
 		return SimpleGroupDTO.builder().id(id).name(name).build();

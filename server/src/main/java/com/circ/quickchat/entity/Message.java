@@ -39,10 +39,6 @@ public class Message {
 	@Column(name = "content")
 	private String content;
 
-	public Message() {
-		// Constructor is empty because use of Entity and SuperBuilder annotations
-	}
-
 	public MessageDTO toMessageDTO() {
 		return MessageDTO.builder().id(id).authorId(authorId)
 				.authorName(authorName).content(content).createdAt(createdAt).build();
