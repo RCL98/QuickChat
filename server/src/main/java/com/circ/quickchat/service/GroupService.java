@@ -1,32 +1,24 @@
 package com.circ.quickchat.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
-
 import DTO.MessageDTO;
 import DTO.NotificationDTO;
-import org.springframework.stereotype.Service;
-
-import com.circ.quickchat.entity.Chat;
-import com.circ.quickchat.entity.Group;
-import com.circ.quickchat.entity.Message;
-import com.circ.quickchat.entity.Photo;
-import com.circ.quickchat.entity.User;
+import com.circ.quickchat.entity.*;
 import com.circ.quickchat.repositories.ChatRepository;
 import com.circ.quickchat.repositories.GroupRepository;
 import com.circ.quickchat.utils.Alerts.ChatAlert;
 import com.circ.quickchat.utils.communcation.UserUtilCommun;
 import com.circ.quickchat.websocket.WebsocketMessage;
-
 import constant.MessageType;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -99,7 +91,7 @@ public class GroupService {
         Photo photo = group.getPhoto();
         if (photo != null) {
             try {
-                Files.delete(Path.of(photo.getBigPhotoUri()));
+                Files.delete(Paths.get(photo.getBigPhotoUri()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
