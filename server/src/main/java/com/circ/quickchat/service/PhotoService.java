@@ -1,32 +1,35 @@
 package com.circ.quickchat.service;
 
-import DTO.PhotoUploadDTO;
-import com.circ.quickchat.entity.ConversationInfo;
-import com.circ.quickchat.entity.Group;
-import com.circ.quickchat.entity.Photo;
-import com.circ.quickchat.entity.User;
-import com.circ.quickchat.repositories.PhotoRepository;
-import com.circ.quickchat.utils.communcation.UserUtilCommun;
-import com.circ.quickchat.websocket.WebsocketMessage;
-import constant.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import com.circ.quickchat.entity.ConversationInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.circ.quickchat.entity.Group;
+import com.circ.quickchat.entity.Photo;
+import com.circ.quickchat.entity.User;
+import com.circ.quickchat.repositories.PhotoRepository;
+import com.circ.quickchat.utils.communcation.UserUtilCommun;
+import com.circ.quickchat.websocket.WebsocketMessage;
+
+import DTO.PhotoUploadDTO;
+import constant.MessageType;
 
 
 @Service
@@ -208,7 +211,7 @@ public class PhotoService {
 	public void deletePhoto(Photo photo) {
 		if (photo != null) {
 			try {
-				Files.delete(Paths.get(photo.getBigPhotoUri()));
+				Files.delete(Path.of(photo.getBigPhotoUri()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
