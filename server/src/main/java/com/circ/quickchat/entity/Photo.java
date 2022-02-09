@@ -22,4 +22,8 @@ public class Photo {
 	@Column(name = "jpeg_photo_uri")
 	private String jpegPhotoUri;
 
+	public Photo() {
+		// Constructor is empty because use of Entity and SuperBuilder annotations
+	}
+
 }

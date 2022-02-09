@@ -29,6 +29,10 @@ public class Conversation {
 	@JoinColumn(name = "conversation_id")
 	private List<ConversationInfo> conversationsInfo;
 
+	public Conversation() {
+		// Constructor is empty because use of Entity and SuperBuilder annotations
+	}
+
 	public ConversationDTO toConversationDTO(Long userConvId) {
 		ConversationInfo conversationInfoForCurrentUser = conversationsInfo.stream()
 				.filter(convInfo -> convInfo.getUserId().equals(userConvId)).findAny()
@@ -48,4 +52,5 @@ public class Conversation {
 		return SimpleConversationDTO.builder().id(id).name(conversationInfoForCurrentUser.getName())
 				.partnerId(partnerId).build();
 	}
+
 }
