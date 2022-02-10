@@ -128,7 +128,7 @@ export default function PrepareAvatarDialog(props) {
                 disabled={disabled}
                 aria-labelledby="Zoom"
                 className="slider"
-                onChange={(e, zoom) => setZoom(zoom)}
+                onChange={(e, _zoom) => setZoom(_zoom)}
               />
             </div>
             <div className="sliderContainer">
@@ -143,7 +143,7 @@ export default function PrepareAvatarDialog(props) {
                 disabled={disabled}
                 aria-labelledby="Rotation"
                 className="slider"
-                onChange={(e, rotation) => setRotation(rotation)}
+                onChange={(e, _rotation) => setRotation(_rotation)}
               />
             </div>
           </div>

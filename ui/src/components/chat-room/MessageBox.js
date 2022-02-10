@@ -58,12 +58,16 @@ export default function MessageBox(props) {
   const avatar = useSelector((state) => state.users.find((user) => user.id === props.author.id))?.avatar;
   const classes = messageStyles(props.author.id === userId);
 
+  const getUserName = (_userId) => {
+    return userId !== props.author.id ? props.author.name : "Me";
+  };
+
   return (
     <div className={classes.root}>
       <Paper className={classes.root + " paper"}>
         {currentChatType === CONVERSATION || currentChatType == null ? (
           <Typography variant="h6" className={classes.author}>
-            {userId !== props.author.id ? props.author.name : "Me"}
+            {getUserName()}
           </Typography>
         ) : (
           <Stack direction="row">
@@ -71,7 +75,7 @@ export default function MessageBox(props) {
               <AccountCircleIcon fontSize="small" />
             </Avatar>
             <Typography variant="h6" className={classes.author}>
-              {userId !== props.author.id ? props.author.name : "Me"}
+              {getUserName()}
             </Typography>
           </Stack>
         )}

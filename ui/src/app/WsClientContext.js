@@ -23,6 +23,7 @@ import {
 import { currentChatChanged, sessionIdChanged, userIdChanged } from "../reducers/profileSlice";
 
 import * as constants from "./constants";
+import getUsersAvatars from "./getUsersAvatars";
 
 import SockJS from "sockjs-client/dist/sockjs";
 import Stomp from "stompjs";
@@ -30,20 +31,6 @@ import axios from "axios";
 
 // create context
 const WsClientContext = createContext();
-
-const getUsersAvatars = async (users) => {
-  for (let i = 0; i < users.length; i++) {
-    await axios
-      .get(constants.serverHost + `/photos/get/${users[i].id}`, {
-        responseType: "arraybuffer",
-      })
-      .then((response) => {
-        users[i].avatar = "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64");
-      })
-      .catch((error) => console.error(error));
-  }
-  return users;
-};
 
 const messageFilter = async (message) => {
   // called when the client receives a STOMP message from the server
