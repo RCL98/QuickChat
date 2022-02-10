@@ -13,37 +13,44 @@ import { CONVERSATION } from "../../app/constants";
 export default function ChatAppBar() {
   const profile = useSelector((state) => state.profile);
   const users = useSelector((state) => state.users).filter((user) => user.id !== profile.userId);
-  let chat = useSelector((state) => state.chats.find((chat) => chat.id === profile.currentChatId));
+  let chat = useSelector((state) => state.chats.find((_chat) => _chat.id === profile.currentChatId));
   if (chat === undefined) chat = { name: "You" };
 
-  const renderUsers = () => {
-    if (chat.type !== CONVERSATION && users.length > 0) {
-      if (users.length <= 3)
-        return (
-          <Typography variant="body1">
-            {users.map((user) => (user.isWriting ? `${user.name} is typing` : user.name)).join(", ")}
-          </Typography>
-        );
-      else
-        return (
-          <Typography variant="body1">
-            {users
-              .sort((a, b) => (a.isWriting === b.isWriting ? 0 : a.isWriting ? -1 : 1))
-              .slice(0, 3)
-              .map((user) => (user.isWriting ? `${user.name} is typing` : user.name))
-              .join(", ") + ", ..."}
-          </Typography>
-        );
-    } else if (users.length > 0) {
-      if (users[0].isWriting) return <Typography variant="body1">{`${users[0].name} is typing`}</Typography>;
-      return null;
-    }
+  const whoIsWriting = (a, b) => {
+    if (a.isWriting === b.isWriting) return 0;
+    return a.isWriting ? -1 : 1;
+  };
 
-    return chat.type === CONVERSATION ? (
-      <Typography variant="body1"> The other user left the conversation </Typography>
-    ) : (
-      <Typography variant="body1"> There is nobody else in the group </Typography>
+  const renderUsersGroup = () => {
+    if (users.length === 0) {
+      return <Typography variant="body1"> There is nobody else in the group </Typography>;
+    }
+    if (users.length <= 3) {
+      return (
+        <Typography variant="body1">
+          {users.map((user) => (user.isWriting ? `${user.name} is typing` : user.name)).join(", ")}
+        </Typography>
+      );
+    }
+    return (
+      <Typography variant="body1">
+        {users
+          .sort((a, b) => whoIsWriting(a, b))
+          .slice(0, 3)
+          .map((user) => (user.isWriting ? `${user.name} is typing` : user.name))
+          .join(", ") + ", ..."}
+      </Typography>
     );
+  };
+
+  const renderUsersConv = () => {
+    if (users.length === 0) return <Typography variant="body1"> The other user left the conversation </Typography>;
+    if (users[0].isWriting) return <Typography variant="body1">{`${users[0].name} is typing`}</Typography>;
+    return null;
+  };
+
+  const renderUsers = () => {
+    return chat.type === CONVERSATION ? renderUsersConv() : renderUsersGroup();
   };
 
   return (

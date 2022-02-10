@@ -85,7 +85,7 @@ export default function StartChatDialog(props) {
                 "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
               },
             })
-            .then(function (response) {
+            .then(function (_response) {
               var reader = new FileReader();
               reader.onload = function () {
                 photo = reader.result;

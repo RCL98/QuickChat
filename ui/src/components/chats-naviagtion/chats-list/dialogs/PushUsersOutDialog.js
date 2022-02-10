@@ -35,9 +35,8 @@ export default function PushUsersOutDialog(props) {
       axios
         .get(serverHost + `/groups/get-users/${props.chat.id}/user/${profile.sessionId}`)
         .then(function (response) {
-          let users = response.data.filter((usr) => usr.id !== profile.userId);
-          console.log(users);
-          getUsersAvatars(users, setUsers, setRenderedUsers);
+          let _users = response.data.filter((usr) => usr.id !== profile.userId);
+          getUsersAvatars(_users, setUsers, setRenderedUsers);
         })
         .catch(function (error) {
           console.error(error);

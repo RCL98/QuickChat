@@ -12,6 +12,9 @@ export default async function getUsersAvatars(_users, setUsers, setRenderedUsers
       })
       .catch((error) => console.error(error));
   }
-  setUsers(_users);
-  setRenderedUsers(_users);
+  if (setUsers && setRenderedUsers) {
+    setUsers(_users);
+    setRenderedUsers(_users);
+  }
+  return _users;
 }
