@@ -10,12 +10,12 @@ import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 
 import { useDispatch } from "react-redux";
 
-import { chatNameUpdated } from "../../../reducers/chatsSlice";
+import { chatNameUpdated } from "../../../../reducers/chatsSlice";
 
-import { WsClientContext } from "../../../app/WsClientContext";
-import { CONVERSATION } from "../../../app/constants";
+import { WsClientContext } from "../../../../app/WsClientContext";
+import { CONVERSATION } from "../../../../app/constants";
 
-import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
+import DraggablePaperComponent from "../../../../app/DraggablePaperComponent";
 
 export default function ChangeChatNameDialog(props) {
   const [chatName, setChatName] = React.useState(props.chat?.name);

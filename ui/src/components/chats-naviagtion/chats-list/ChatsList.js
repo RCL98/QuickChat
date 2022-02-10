@@ -5,12 +5,15 @@ import Divider from "@mui/material/Divider";
 
 import { useSelector } from "react-redux";
 
-import ChatBoxItem from "./ChatBoxItem";
-import ChangeGroupPhotoDialog from "./ChangeGroupPhotoDialog";
-import ChangeChatNameDialog from "./ChangeChatNameDialog";
-import AddNewUsersDialog from "./AddNewUsersDialog";
-import GetOutOfChatDialog from "./GetOutOfChatDialog";
-import PushUsersOutDialog from "./PushUsersOutDialog";
+import ChangeGroupPhotoDialog from "./dialogs/ChangeGroupPhotoDialog";
+import ChangeChatNameDialog from "./dialogs/ChangeChatNameDialog";
+import AddNewUsersDialog from "./dialogs/AddNewUsersDialog";
+import GetOutOfChatDialog from "./dialogs/GetOutOfChatDialog";
+import PushUsersOutDialog from "./dialogs/PushUsersOutDialog";
+import ConvBoxItem from "./ConvBoxItem";
+import GroupBoxItem from "./GroupBoxItem";
+
+import { CONVERSATION } from "../../../app/constants";
 
 export default function ChatsList(props) {
   const [openNameDialog, setOpenNameDialog] = React.useState(false);
@@ -22,6 +25,31 @@ export default function ChatsList(props) {
   const [chosenChat, setChosenChat] = React.useState(null);
 
   const chats = useSelector((state) => state.chats);
+
+  const renderProperChat = (_chat, _labelId) => {
+    if (_chat.type === CONVERSATION) {
+      return (
+        <ConvBoxItem
+          chat={_chat}
+          labelId={_labelId}
+          dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
+          dialogGetOut={{ value: openGetOutDialog, setter: setOpenGetOutDialog }}
+        />
+      );
+    }
+    return (
+      <GroupBoxItem
+        chat={_chat}
+        labelId={_labelId}
+        dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
+        dialogPhoto={{ value: openPhotoDialog, setter: setOpenPhotoDialog }}
+        dialogAddUsers={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }}
+        dialogGetOut={{ value: openGetOutDialog, setter: setOpenGetOutDialog }}
+        dialogPushOut={{ value: openPushOutDialog, setter: setOpenPushOutDialog }}
+        setChosenChat={setChosenChat}
+      />
+    );
+  };
 
   const renderChatsList = () => {
     let renderedChats = chats;
@@ -36,16 +64,7 @@ export default function ChatsList(props) {
             const labelId = `chat-list-label-${index}`;
             return (
               <div key={chat.id}>
-                <ChatBoxItem
-                  chat={chat}
-                  labelId={labelId}
-                  dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
-                  dialogPhoto={{ value: openPhotoDialog, setter: setOpenPhotoDialog }}
-                  dialogAddUsers={{ value: openAddUsersDialog, setter: setOpenAddUsersDialog }}
-                  dialogGetOut={{ value: openGetOutDialog, setter: setOpenGetOutDialog }}
-                  dialogPushOut={{ value: openPushOutDialog, setter: setOpenPushOutDialog }}
-                  setChosenChat={setChosenChat}
-                />
+                {renderProperChat(chat, labelId)}
                 <Divider variant="inset" component="li" />
               </div>
             );

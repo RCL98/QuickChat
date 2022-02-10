@@ -10,17 +10,17 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
-import UsersListCheck from "../start-chats-navigation/UsersListCheck";
-import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
+import UsersListCheck from "../../start-chats-navigation/UsersListCheck";
+import DraggablePaperComponent from "../../../../app/DraggablePaperComponent";
 
 import { useSelector } from "react-redux";
 
 import axios from "axios";
-import { WsClientContext } from "../../../app/WsClientContext";
-import getUsersAvatars from "../../../app/getUsersAvatars";
-import { serverHost } from "../../../app/constants";
+import { WsClientContext } from "../../../../app/WsClientContext";
+import getUsersAvatars from "../../../../app/getUsersAvatars";
+import { serverHost } from "../../../../app/constants";
 
-export default function PushUsersOutDialog(props) {
+export default function AddNewUsersDialog(props) {
   const wsClient = React.useContext(WsClientContext);
 
   const [lookupText, setLookupText] = React.useState("");
@@ -28,16 +28,23 @@ export default function PushUsersOutDialog(props) {
   const [users, setUsers] = React.useState([]);
   const [renderedUsers, setRenderedUsers] = React.useState([]);
 
-  const profile = useSelector((state) => state.profile);
+  const sessionId = useSelector((state) => state.profile.sessionId);
 
   const getUsersList = () => {
     if (props.open.value) {
       axios
-        .get(serverHost + `/groups/get-users/${props.chat.id}/user/${profile.sessionId}`)
+        .get(serverHost + `/groups/get-users-ids/${props.chat.id}/user/${sessionId}`)
         .then(function (response) {
-          let users = response.data.filter((usr) => usr.id !== profile.userId);
-          console.log(users);
-          getUsersAvatars(users, setUsers, setRenderedUsers);
+          let old_users = new Set(response.data);
+          axios
+            .get(serverHost + `/users/${sessionId}`)
+            .then(function (_response) {
+              let newUsers = _response.data.filter((user) => !old_users.has(user.id));
+              getUsersAvatars(newUsers, setUsers, setRenderedUsers);
+            })
+            .catch(function (error) {
+              console.error(error);
+            });
         })
         .catch(function (error) {
           console.error(error);
@@ -45,7 +52,7 @@ export default function PushUsersOutDialog(props) {
     }
   };
 
-  React.useEffect(getUsersList, [props.open.value, profile, props.chat?.id]);
+  React.useEffect(getUsersList, [props.open.value, sessionId, props.chat?.id]);
 
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
@@ -59,14 +66,14 @@ export default function PushUsersOutDialog(props) {
     setChecked(newChecked);
   };
 
-  const handlePushUsersOut = () => {
+  const handleAddUsers = () => {
     if (wsClient) {
       const payload = users
         .filter((user) => checked.indexOf(user.id) !== -1)
         .map((user) => {
           return user.id;
         });
-      wsClient.send(`/groups/push-users-out/${props.chat.id}`, {}, JSON.stringify(payload));
+      wsClient.send(`/groups/addUsers/${props.chat.id}`, {}, JSON.stringify(payload));
     }
     setChecked([]);
     props.open.setter(false);
@@ -98,7 +105,7 @@ export default function PushUsersOutDialog(props) {
         sx={{ overflowY: "hidden", height: "100%" }}
       >
         <DialogTitle style={{ cursor: "move" }} id="draggable-add-new-users-dialog-title">
-          Get users out of group
+          Start a chat
           <IconButton
             aria-label="close"
             onClick={handleClose}
@@ -114,7 +121,7 @@ export default function PushUsersOutDialog(props) {
         </DialogTitle>
 
         <DialogContent id="add-new-users-dialog-context" sx={{ overflow: "hidden", height: "100%" }}>
-          <DialogContentText>Choose some users too delete of to the group.</DialogContentText>
+          <DialogContentText>Choose some users too add to the group.</DialogContentText>
           <Box
             id="users-dialog"
             sx={{
@@ -195,7 +202,7 @@ export default function PushUsersOutDialog(props) {
 
         <DialogActions>
           <Button onClick={handleClose}>Close</Button>
-          <Button onClick={handlePushUsersOut}>Delete</Button>
+          <Button onClick={handleAddUsers}>Add</Button>
         </DialogActions>
       </Dialog>
     </div>
