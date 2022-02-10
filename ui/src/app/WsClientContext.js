@@ -1,5 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
 
+import Stack from "@mui/material/Stack";
+import CircularProgress from "@mui/material/CircularProgress";
+
 import store from "./store";
 import { updateMessagesList, messageAdded } from "../reducers/messagesSlice";
 import {
@@ -44,119 +47,117 @@ const getUsersAvatars = async (users) => {
 
 const messageFilter = async (message) => {
   // called when the client receives a STOMP message from the server
-  if (message) {
-    if (message.body) {
-      const generalMessage = JSON.parse(message.body);
-      switch (generalMessage.messageType) {
-        case constants.MESSAGE:
-          store.dispatch(messageAdded(generalMessage.content));
-          store.dispatch(
-            chatUpdateLastMessage({
-              chatId: store.getState().profile.currentChatId,
-              message: generalMessage.content,
-            })
-          );
-          break;
+  if (message.body) {
+    const generalMessage = JSON.parse(message.body);
+    switch (generalMessage.messageType) {
+      case constants.MESSAGE:
+        store.dispatch(messageAdded(generalMessage.content));
+        store.dispatch(
+          chatUpdateLastMessage({
+            chatId: store.getState().profile.currentChatId,
+            message: generalMessage.content,
+          })
+        );
+        break;
 
-        case constants.NOTIFICATION:
-          store.dispatch(chatNewNotification(generalMessage.content));
-          break;
+      case constants.NOTIFICATION:
+        store.dispatch(chatNewNotification(generalMessage.content));
+        break;
 
-        case constants.NEW_CHAT:
-          if (generalMessage.content.type === constants.CONVERSATION) {
-            axios
-              .get(constants.serverHost + `/photos/get/${generalMessage.content.partnerId}`, {
-                responseType: "arraybuffer",
-              })
-              .then((response) => {
-                generalMessage.content.photo =
-                  "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64");
-                store.dispatch(chatAdded(generalMessage.content));
-              })
-              .catch((error) => console.error(error));
-          } else {
-            store.dispatch(chatAdded(generalMessage.content));
-          }
-          break;
-
-        case constants.UPDATE_GROUP_NAME:
-          store.dispatch(chatNameUpdated(generalMessage.content));
-          break;
-
-        case constants.UPDATE_GROUP_PHOTO:
+      case constants.NEW_CHAT:
+        if (generalMessage.content.type === constants.CONVERSATION) {
           axios
-            .get(constants.serverHost + `/photos/group/get/${generalMessage.content}`, {
+            .get(constants.serverHost + `/photos/get/${generalMessage.content.partnerId}`, {
               responseType: "arraybuffer",
             })
             .then((response) => {
-              store.dispatch(
-                chatPhotoUpdated({
-                  id: generalMessage.content,
-                  photo: "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64"),
-                })
-              );
+              generalMessage.content.photo =
+                "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64");
+              store.dispatch(chatAdded(generalMessage.content));
             })
             .catch((error) => console.error(error));
-          break;
+        } else {
+          store.dispatch(chatAdded(generalMessage.content));
+        }
+        break;
 
-        case constants.UPDATE_USER_PHOTO:
-          axios
-            .get(constants.serverHost + `/photos/get/${generalMessage.content.userId}`, {
-              responseType: "arraybuffer",
-            })
-            .then((response) => {
-              store.dispatch(
-                chatPhotoUpdated({
-                  id: generalMessage.content.convId,
-                  photo: "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64"),
-                })
-              );
-            })
-            .catch((error) => console.error(error));
-          break;
+      case constants.UPDATE_GROUP_NAME:
+        store.dispatch(chatNameUpdated(generalMessage.content));
+        break;
 
-        case constants.REQUESTED_CHAT:
+      case constants.UPDATE_GROUP_PHOTO:
+        axios
+          .get(constants.serverHost + `/photos/group/get/${generalMessage.content}`, {
+            responseType: "arraybuffer",
+          })
+          .then((response) => {
+            store.dispatch(
+              chatPhotoUpdated({
+                id: generalMessage.content,
+                photo: "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64"),
+              })
+            );
+          })
+          .catch((error) => console.error(error));
+        break;
+
+      case constants.UPDATE_USER_PHOTO:
+        axios
+          .get(constants.serverHost + `/photos/get/${generalMessage.content.userId}`, {
+            responseType: "arraybuffer",
+          })
+          .then((response) => {
+            store.dispatch(
+              chatPhotoUpdated({
+                id: generalMessage.content.convId,
+                photo: "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64"),
+              })
+            );
+          })
+          .catch((error) => console.error(error));
+        break;
+
+      case constants.REQUESTED_CHAT:
+        store.dispatch(updateMessagesList([]));
+        const users = await getUsersAvatars(generalMessage.content.users);
+        store.dispatch(usersListUpdated(users));
+        store.dispatch(updateMessagesList(generalMessage.content.messages));
+        store.dispatch(currentChatChanged({ id: generalMessage.content.id, type: generalMessage.content.type }));
+        break;
+
+      case constants.ADD_USER_CHAT:
+        store.dispatch(userAdded(generalMessage.content.user));
+        break;
+
+      case constants.DELETE_USER_CHAT:
+        store.dispatch(userDeleted(generalMessage.content.user));
+        break;
+
+      case constants.PUSHED_USER_OUT:
+        if (store.getState().profile.currentChatId === generalMessage.content.id) {
+          store.dispatch(usersListUpdated([]));
           store.dispatch(updateMessagesList([]));
-          const users = await getUsersAvatars(generalMessage.content.users);
-          store.dispatch(usersListUpdated(users));
-          store.dispatch(updateMessagesList(generalMessage.content.messages));
-          store.dispatch(currentChatChanged({ id: generalMessage.content.id, type: generalMessage.content.type }));
-          break;
+          store.dispatch(currentChatChanged({ id: null, type: constants.GROUP }));
+        }
+        store.dispatch(chatDeleted(generalMessage.content));
+        alert(`You were pushet out of group ${generalMessage.content.name}`);
+        break;
 
-        case constants.ADD_USER_CHAT:
-          store.dispatch(userAdded(generalMessage.content.user));
-          break;
+      case constants.UPDATE_CHAT_USER:
+        store.dispatch(usernameUpdated(generalMessage.content));
+        store.dispatch(chatUpdateLastMessage(generalMessage.content));
+        break;
 
-        case constants.DELETE_USER_CHAT:
-          store.dispatch(userDeleted(generalMessage.content.user));
-          break;
+      case constants.UPDATE_WHO_IS_WRITING:
+        store.dispatch(currentyWritingUpdated(generalMessage.content));
+        break;
 
-        case constants.PUSHED_USER_OUT:
-          if (store.getState().profile.currentChatId === generalMessage.content.id) {
-            store.dispatch(usersListUpdated([]));
-            store.dispatch(updateMessagesList([]));
-            store.dispatch(currentChatChanged({ id: null, type: constants.GROUP }));
-          }
-          store.dispatch(chatDeleted(generalMessage.content));
-          alert(`You were pushet out of group ${generalMessage.content.name}`);
-          break;
-
-        case constants.UPDATE_CHAT_USER:
-          store.dispatch(usernameUpdated(generalMessage.content));
-          store.dispatch(chatUpdateLastMessage(generalMessage.content));
-          break;
-
-        case constants.UPDATE_WHO_IS_WRITING:
-          store.dispatch(currentyWritingUpdated(generalMessage.content));
-          break;
-
-        default:
-          console.log(`MESSAGE TYPE NOT RECOGNIZED: ${generalMessage.messageType}`);
-          break;
-      }
-    } else {
-      console.log("GOT EMPTY MESSAGE!");
+      default:
+        console.log(`MESSAGE TYPE NOT RECOGNIZED: ${generalMessage.messageType}`);
+        break;
     }
+  } else {
+    console.log("GOT EMPTY MESSAGE!");
   }
 };
 
@@ -204,11 +205,17 @@ const WsClientContextProvider = ({ children }) => {
         style={{
           display: "flex",
           top: "50%",
+          height: "100%",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <h1>Client is loading</h1>
+        <Stack>
+          <h1>QuickChat Client is loading</h1>
+          <div style={{ justifyContent: "center", alignItems: "center", display: "flex" }}>
+            <CircularProgress size={60} />
+          </div>
+        </Stack>
       </div>
     );
   };

@@ -10,7 +10,7 @@ import ChangeGroupPhotoDialog from "./ChangeGroupPhotoDialog";
 import ChangeChatNameDialog from "./ChangeChatNameDialog";
 import AddNewUsersDialog from "./AddNewUsersDialog";
 import GetOutOfChatDialog from "./GetOutOfChatDialog";
-import PushUsersOutDialog from "./PushUserOutDialog";
+import PushUsersOutDialog from "./PushUsersOutDialog";
 
 export default function ChatsList(props) {
   const [openNameDialog, setOpenNameDialog] = React.useState(false);
