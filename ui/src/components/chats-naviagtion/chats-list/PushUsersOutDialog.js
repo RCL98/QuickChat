@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 
 import axios from "axios";
 import { WsClientContext } from "../../../app/WsClientContext";
-
+import getUsersAvatars from "../../../app/getUsersAvatars";
 import { serverHost } from "../../../app/constants";
 
 export default function PushUsersOutDialog(props) {
@@ -30,21 +30,6 @@ export default function PushUsersOutDialog(props) {
 
   const profile = useSelector((state) => state.profile);
 
-  const getUsersAvatars = async (users) => {
-    for (let i = 0; i < users.length; i++) {
-      await axios
-        .get(serverHost + `/photos/get/${users[i].id}`, {
-          responseType: "arraybuffer",
-        })
-        .then((response) => {
-          users[i].avatar = "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64");
-        })
-        .catch((error) => console.error(error));
-    }
-    setUsers(users);
-    setRenderedUsers(users);
-  };
-
   const getUsersList = () => {
     if (props.open.value) {
       axios
@@ -52,7 +37,7 @@ export default function PushUsersOutDialog(props) {
         .then(function (response) {
           let users = response.data.filter((usr) => usr.id !== profile.userId);
           console.log(users);
-          getUsersAvatars(users);
+          getUsersAvatars(users, setUsers, setRenderedUsers);
         })
         .catch(function (error) {
           console.error(error);

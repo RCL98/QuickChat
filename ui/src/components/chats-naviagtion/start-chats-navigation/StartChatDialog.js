@@ -18,7 +18,7 @@ import { chatAdded } from "../../../reducers/chatsSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 import axios from "axios";
-
+import getUsersAvatars from "../../../app/getUsersAvatars";
 import { serverHost, GROUP, CONVERSATION } from "../../../app/constants";
 
 export default function StartChatDialog(props) {
@@ -34,27 +34,12 @@ export default function StartChatDialog(props) {
 
   const dispatch = useDispatch();
 
-  const getUsersAvatars = async (users) => {
-    for (let i = 0; i < users.length; i++) {
-      await axios
-        .get(serverHost + `/photos/get/${users[i].id}`, {
-          responseType: "arraybuffer",
-        })
-        .then((response) => {
-          users[i].avatar = "data:image/jpeg;base64," + Buffer.from(response.data, "binary").toString("base64");
-        })
-        .catch((error) => console.error(error));
-    }
-    setUsers(users);
-    setRenderedUsers(users);
-  };
-
   const getUsersList = () => {
     if (props.open.value) {
       axios
         .get(serverHost + `/users/${sessionId}`)
         .then(function (response) {
-          getUsersAvatars(response.data);
+          getUsersAvatars(response.data, setUsers, setRenderedUsers);
         })
         .catch(function (error) {
           console.error(error);
