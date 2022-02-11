@@ -24,33 +24,34 @@ const messagesListStyles = makeStyles((theme) => {
 
 export default function MessagesList() {
   const messages = useSelector((state) => state.messages);
+  const profile = useSelector((state) => state.profile);
+
+  const [currentChat, setCurrentChat] = React.useState(null);
+
   const classes = messagesListStyles();
 
-  // const getScroll = () => {
-  //   if (window.pageYOffset !== undefined) {
-  //     // console.log(" Y-axis : " + window.pageYOffset);
-  //     return window.pageYOffset;
-  //   } else {
-  //     var y_axis,
-  //       doc = document,
-  //       ele = doc.documentElement,
-  //       b = doc.body;
-  //     y_axis = ele.scrollTop || b.scrollTop || 0;
-  //     // console.log(" Y-axis : " + y_axis);
-  //     return y_axis;
-  //   }
-  // };
-
   useEffect(() => {
-    // getScroll()
-    document.getElementById("last").scrollIntoView(true);
-    // getScroll();
-  }, [messages]);
+    if (currentChat !== profile.currentChatId) {
+      setCurrentChat(profile.currentChatId);
+      document.getElementById("last").scrollIntoView(true);
+    } else if (
+      Array.isArray(messages) &&
+      messages.length &&
+      messages[messages.length - 1].authorId === profile.userId
+    ) {
+      document.getElementById("last").scrollIntoView(true);
+    }
+  }, [messages, currentChat, profile]);
 
   return (
     <div className={classes.messagesList}>
       {messages.map((msg) => (
-        <MessageBox key={msg.id} author={{id: msg.authorId, name: msg.authorName}} content={msg.content} createdAt={msg.createdAt} />
+        <MessageBox
+          key={msg.id}
+          author={{ id: msg.authorId, name: msg.authorName }}
+          content={msg.content}
+          createdAt={msg.createdAt}
+        />
       ))}
       <Box className={classes.box}>
         <div id="last" />

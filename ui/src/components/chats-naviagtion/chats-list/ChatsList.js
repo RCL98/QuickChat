@@ -63,7 +63,7 @@ export default function ChatsList(props) {
           {renderedChats.map((chat, index) => {
             const labelId = `chat-list-label-${index}`;
             return (
-              <div key={chat.id}>
+              <div key={chat.id} style={{ width: "100%", maxWidth: "100%", bgcolor: "background.paper" }}>
                 {renderProperChat(chat, labelId)}
                 <Divider variant="inset" component="li" />
               </div>

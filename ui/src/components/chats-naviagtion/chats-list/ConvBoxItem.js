@@ -77,7 +77,7 @@ export default function ConvBoxItem(props) {
           <AccountCircleIcon />
         </Avatar>
       </ListItemAvatar>
-      <Stack sx={{ width: "75%" }}>
+      <Stack sx={{ width: "75%", whiteSpace: "nowrap" }}>
         <Typography variant="h6"> {props.chat.name} </Typography>
         {(() => {
           if (props.chat.lastMessage) {
