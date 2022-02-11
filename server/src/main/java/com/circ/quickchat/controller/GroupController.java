@@ -1,9 +1,11 @@
 package com.circ.quickchat.controller;
 
 import DTO.SimpleGroupDTO;
+import com.circ.quickchat.entity.Chat;
 import com.circ.quickchat.entity.Group;
 import com.circ.quickchat.entity.Message;
 import com.circ.quickchat.entity.User;
+import com.circ.quickchat.service.ChatService;
 import com.circ.quickchat.service.GroupService;
 import com.circ.quickchat.service.UserService;
 import com.circ.quickchat.utils.communcation.UserUtilCommun;
@@ -31,9 +33,14 @@ public class GroupController {
 	
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ChatService chatService;
 	
 	@Autowired
 	private UserUtilCommun userUtilCommun;
+
+
 	
 
 	//endpoint for websocket client
@@ -41,11 +48,12 @@ public class GroupController {
 	public void processMessage(Message message,  SimpMessageHeaderAccessor  headerAccessor) {
 		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
 		User user = userService.getUserBySessionId(sessionId);
+		Chat chat = chatService.findChatById(message.getChat().getId());
 		message = message.toBuilder().authorId(user.getId()).authorName(user.getName()).build();
-//		if (message.getChat().getUsers().stream().noneMatch(usr-> usr.getId().equals(user.getId()))) {
-//			throw new InternalError(String.format("User %d that tries to send message in group %d doesn't belong to it!",
-//					user.getId(), message.getChat().getId()));
-//		}
+		if (chat.getUsers().stream().noneMatch(usr-> usr.getId().equals(user.getId()))) {
+			throw new InternalError(String.format("User %d that tries to send message in group %d doesn't belong to it!",
+					user.getId(), message.getChat().getId()));
+		}
 		groupService.sendMessage(message, sessionId);
 	}
 	

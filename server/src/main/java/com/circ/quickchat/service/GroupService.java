@@ -9,6 +9,7 @@ import javax.transaction.Transactional;
 
 import DTO.MessageDTO;
 import DTO.NotificationDTO;
+import com.circ.quickchat.repositories.MessageRepository;
 import org.springframework.stereotype.Service;
 
 import com.circ.quickchat.entity.Chat;
@@ -39,11 +40,13 @@ public class GroupService {
 
     private final UserService userService;
 
+    private final MessageRepository messageRepository;
+
     @Transactional
     public void sendMessage(Message message, String sessionIdAuthor) {
         Chat chat = chatRepository.findById(message.getChat().getId()).orElseThrow(() -> new InternalError(
                 String.format("A chat with id: %d doesn't exist!", message.getId())));
-        chat.getMessages().add(message);
+        chat.getMessages().add(messageRepository.save(message));
         chatRepository.save(chat);
         List<String> usersFromChatWithoutAuthor = new ArrayList<>();
         List<String> usersFromChatNotOn = new ArrayList<>();

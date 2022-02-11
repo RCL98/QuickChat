@@ -27,7 +27,6 @@ const chatsSlice = createSlice({
     chatUpdateLastMessage(state, action) {
       console.log(action.payload);
       if (action.payload.hasOwnProperty("message")) {
-        console.log("has message field");
         return state.map((chat) =>
           chat.id === action.payload.chatId ? { ...chat, lastMessage: action.payload.message } : chat
         );
