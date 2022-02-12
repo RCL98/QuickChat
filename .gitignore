@@ -46,6 +46,9 @@
 !/server/**/src/main/**/target/
 !/server/**/src/test/**/target/
 
+#go_secure
+/go_secure/anonymous_quickhat
+
 ### STS ###
 /server/.apt_generated
 /server/.classpath
