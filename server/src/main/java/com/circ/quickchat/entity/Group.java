@@ -30,15 +30,19 @@ public class Group {
 	
 	@Column(name = "group_name")
 	private String name;
-
-
+	
+	
+	public Group() {
+		// Constructor is empty because use of Entity and SuperBuilder annotations
+	}
+	
 	public SimpleGroupDTO toSimpleGroupDTO() {
 		return SimpleGroupDTO.builder().id(id).name(name).build();
 	}
 	
 	public GroupDTO toGroupDTO() {
 		return GroupDTO.builder().id(id).name(name)
-				.users(chat.getUsers().stream().map(User::toUserDTO).collect(Collectors.toSet()))
+				.users(chat.getUsers().stream().map(usr -> usr.toUserDTO()).collect(Collectors.toSet()))
 				.messages(chat.getMessages().stream().map(Message::toMessageDTO).collect(Collectors.toList())).build();
 	}
 

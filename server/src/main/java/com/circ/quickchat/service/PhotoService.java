@@ -1,32 +1,33 @@
 package com.circ.quickchat.service;
 
-import DTO.PhotoUploadDTO;
-import com.circ.quickchat.entity.ConversationInfo;
-import com.circ.quickchat.entity.Group;
-import com.circ.quickchat.entity.Photo;
-import com.circ.quickchat.entity.User;
-import com.circ.quickchat.repositories.PhotoRepository;
-import com.circ.quickchat.utils.communcation.UserUtilCommun;
-import com.circ.quickchat.websocket.WebsocketMessage;
-import constant.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.circ.quickchat.entity.Group;
+import com.circ.quickchat.entity.Photo;
+import com.circ.quickchat.entity.User;
+import com.circ.quickchat.repositories.PhotoRepository;
+import com.circ.quickchat.utils.communcation.UserUtilCommun;
+import com.circ.quickchat.websocket.WebsocketMessage;
+
+import DTO.PhotoUploadDTO;
+import constant.MessageType;
 
 
 @Service
@@ -49,10 +50,6 @@ public class PhotoService {
 	
 	@Autowired
 	private ConversationService conversationService;
-
-	private static final String USER_ID = "userId";
-
-	private static final String CONV_ID = "convId";
 	
 	@PostConstruct
 	public void initDirectoryPhotos() {
@@ -73,24 +70,25 @@ public class PhotoService {
 		deletePhoto(prevPhoto);
 		List<Map<String, Object>> convsInfo = conversationService.findAll()
 				.stream().filter(conv -> {
-					List<Long> users = conv.getConversationsInfo().stream().map(ConversationInfo::getUserId)
+					List<Long> users = conv.getConversationsInfo().stream().map(cInfo -> cInfo.getUserId())
 							.collect(Collectors.toList());
-					return users.stream().anyMatch(userId -> userId.equals(usr.getId()));
+					Boolean isGoodConv = users.stream().anyMatch(userId -> userId.equals(usr.getId()));
+					return isGoodConv;
 				}).map(conv -> {
-					Map<String, Object> infoConvMap = new HashMap<>();
-					List<Long> users = conv.getConversationsInfo().stream().map(ConversationInfo::getUserId)
+					Map<String, Object> infoConvMap = new HashMap<String, Object>();
+					List<Long> users = conv.getConversationsInfo().stream().map(cInfo -> cInfo.getUserId())
 							.collect(Collectors.toList());
 					Long userId  = users.stream().filter(usrId -> !usrId.equals(usr.getId())).findAny().get();
-					infoConvMap.put(USER_ID, userId);
-					infoConvMap.put(CONV_ID, conv.getId());
+					infoConvMap.put("userId", userId);
+					infoConvMap.put("convId", conv.getId());
 					return infoConvMap;
 				}).collect(Collectors.toList());
 		
 		convsInfo.forEach(infoConvMap -> {
-			String sessionId = userService.getUserForId((Long)infoConvMap.get(USER_ID)).getSessionId();
-			Map<String, Long> messageMap = new HashMap<>();
-			messageMap.put(USER_ID, usr.getId());
-			messageMap.put(CONV_ID, (Long)infoConvMap.get(CONV_ID));
+			String sessionId = userService.getUserForId((Long)infoConvMap.get("userId")).getSessionId();
+			Map<String, Long> messageMap = new HashMap<String, Long>();
+			messageMap.put("userId", usr.getId());
+			messageMap.put("convId", (Long)infoConvMap.get("convId"));
 			WebsocketMessage websocketMessage = WebsocketMessage.builder().messageType(MessageType.UPDATE_USER_PHOTO)
 					.content(messageMap).build();
 			userUtilCommun.sendToUser(sessionId, websocketMessage);
@@ -109,7 +107,7 @@ public class PhotoService {
 				.content(groupId).messageType(MessageType.UPDATE_GROUP_PHOTO)
 				.build();
 		userUtilCommun.sendToUsers(websocketMessage, group.getChat().getUsers()
-				.stream().map(User::getSessionId)
+				.stream().map(usr -> usr.getSessionId())
 				.filter(filSessionId -> !filSessionId.equals(sessionId))
 				.collect(Collectors.toList()));
 		
@@ -138,24 +136,25 @@ public class PhotoService {
 		deletePhoto(photo);
 		List<Map<String, Object>> convsInfo = conversationService.findAll()
 				.stream().filter(conv -> {
-					List<Long> users = conv.getConversationsInfo().stream().map(ConversationInfo::getUserId)
+					List<Long> users = conv.getConversationsInfo().stream().map(cInfo -> cInfo.getUserId())
 							.collect(Collectors.toList());
-					return users.stream().anyMatch(userId -> userId.equals(usr.getId()));
+					Boolean isGoodConv = users.stream().anyMatch(userId -> userId.equals(usr.getId()));
+					return isGoodConv;
 				}).map(conv -> {
-					Map<String, Object> infoConvMap = new HashMap<>();
-					List<Long> users = conv.getConversationsInfo().stream().map(ConversationInfo::getUserId)
+					Map<String, Object> infoConvMap = new HashMap<String, Object>();
+					List<Long> users = conv.getConversationsInfo().stream().map(cInfo -> cInfo.getUserId())
 							.collect(Collectors.toList());
 					Long userId  = users.stream().filter(usrId -> !usrId.equals(usr.getId())).findAny().get();
-					infoConvMap.put(USER_ID, userId);
-					infoConvMap.put(CONV_ID, conv.getId());
+					infoConvMap.put("userId", userId);
+					infoConvMap.put("convId", conv.getId());
 					return infoConvMap;
 				}).collect(Collectors.toList());
 		
 		convsInfo.forEach(infoConvMap -> {
-			String sessionId2 = userService.getUserForId((Long)infoConvMap.get(USER_ID)).getSessionId();
-			Map<String, Long> messageMap = new HashMap<>();
-			messageMap.put(USER_ID, usr.getId());
-			messageMap.put(CONV_ID, (Long)infoConvMap.get(CONV_ID));
+			String sessionId2 = userService.getUserForId((Long)infoConvMap.get("userId")).getSessionId();
+			Map<String, Long> messageMap = new HashMap<String, Long>();
+			messageMap.put("userId", usr.getId());
+			messageMap.put("convId", (Long)infoConvMap.get("convId"));
 			WebsocketMessage websocketMessage = WebsocketMessage.builder().messageType(MessageType.UPDATE_USER_PHOTO)
 					.content(messageMap).build();
 			userUtilCommun.sendToUser(sessionId2, websocketMessage);
@@ -172,7 +171,7 @@ public class PhotoService {
 			String photoUri = photo.getBigPhotoUri();
 			return getPhotoBytes(photoUri);
 		}
-		return new byte[0];
+		return null;
 	}
 	
 	public byte[] getPhotoForUser(Long userId) throws IOException {
@@ -182,7 +181,7 @@ public class PhotoService {
 			String photoUri = photo.getBigPhotoUri();
 			return getPhotoBytes(photoUri);
 		}
-		return new byte[0];
+		return null;
 	}
 	
 	private Photo savePhoto(MultipartFile file) throws IOException {
@@ -207,10 +206,9 @@ public class PhotoService {
 	
 	public void deletePhoto(Photo photo) {
 		if (photo != null) {
-			try {
-				Files.delete(Paths.get(photo.getBigPhotoUri()));
-			} catch (IOException e) {
-				e.printStackTrace();
+			File file = new File(photo.getBigPhotoUri());
+			if (file.exists()) {
+				file.delete();
 			}
 			photoRepository.delete(photo);
 		}

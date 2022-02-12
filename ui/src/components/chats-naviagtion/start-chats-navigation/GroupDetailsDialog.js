@@ -147,27 +147,32 @@ export default function GroupDetailsDialog(props) {
                     sx={{ display: "none" }}
                     onChange={handlePhotoUpload}
                   />
-                  {props.groupPhoto.value === null ? (
-                    <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
-                      Upload photo
-                    </Button>
-                  ) : (
-                    <ButtonGroup variant="contained" aria-label="outlined photo button group">
-                      <Button component="span" endIcon={<AddAPhotoIcon />}>
-                        Change photo
-                      </Button>
-                      <Button
-                        component="span"
-                        endIcon={<DeleteIcon />}
-                        onClick={(event) => {
-                          event.preventDefault();
-                          props.groupPhoto.setter(null);
-                        }}
-                      >
-                        Remove photo
-                      </Button>
-                    </ButtonGroup>
-                  )}
+                  {(() => {
+                    if (props.groupPhoto.value === null) {
+                      return (
+                        <Button variant="contained" component="span" endIcon={<AddAPhotoIcon />}>
+                          Upload photo
+                        </Button>
+                      );
+                    }
+                    return (
+                      <ButtonGroup variant="contained" aria-label="outlined photo button group">
+                        <Button component="span" endIcon={<AddAPhotoIcon />}>
+                          Change photo
+                        </Button>
+                        <Button
+                          component="span"
+                          endIcon={<DeleteIcon />}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            props.groupPhoto.setter(null);
+                          }}
+                        >
+                          Remove photo
+                        </Button>
+                      </ButtonGroup>
+                    );
+                  })()}
                 </label>
               </Stack>
             ) : null}

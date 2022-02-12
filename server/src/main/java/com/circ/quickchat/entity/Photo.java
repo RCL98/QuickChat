@@ -1,10 +1,16 @@
 package com.circ.quickchat.entity;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import javax.persistence.*;
 
 @Setter
 @Getter
@@ -21,5 +27,8 @@ public class Photo {
 	
 	@Column(name = "jpeg_photo_uri")
 	private String jpegPhotoUri;
-
+	
+	public Photo() {
+		// Constructor is empty because use of Entity and SuperBuilder annotations
+	}
 }

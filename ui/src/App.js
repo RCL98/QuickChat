@@ -10,7 +10,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import darkScrollbar from "@mui/material/darkScrollbar";
 
 import ChatRoom from "./components/chat-room/ChatRoom";
-import MyAppBar from "./components/app-bar/AppBar";
+import MyAppBar from "./components/app-bar/MyAppBar";
 import ChatNavigation from "./components/chats-naviagtion/ChatNavigation";
 
 import { WsClientContextProvider } from "./app/WsClientContext";

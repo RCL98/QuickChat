@@ -16,13 +16,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { chatPhotoUpdated } from "../../../reducers/chatsSlice";
+import { chatPhotoUpdated } from "../../../../reducers/chatsSlice";
 
-import { serverHost } from "../../../app/constants";
+import { serverHost } from "../../../../app/constants";
 
-import AlertDialog from "../../../app/AlertDialog";
-import PrepareAvatarDialog from "../../../app/PrepareAvatarDialog";
-import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
+import AlertDialog from "../../../../app/AlertDialog";
+import PrepareAvatarDialog from "../../../../app/PrepareAvatarDialog";
+import DraggablePaperComponent from "../../../../app/DraggablePaperComponent";
 
 import axios from "axios";
 

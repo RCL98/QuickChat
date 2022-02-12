@@ -44,6 +44,13 @@ public class User {
 	@JsonIgnoreProperties({"users", "messages"})
 	private Chat currentChat;
 
+/*	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@JoinTable(name = "users_to_chat",
+			joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns = @JoinColumn(name = "chat_id")
+	)
+	@JsonIgnoreProperties("users")
+	private List<Chat> chats;*/
 	
 	public User() {
 		// Constructor is empty because use of Entity and SuperBuilder annotations

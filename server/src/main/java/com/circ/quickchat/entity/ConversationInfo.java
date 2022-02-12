@@ -31,4 +31,7 @@ public class ConversationInfo {
 	@Column(name = "chat_name")
 	private String name;
 
+	public ConversationInfo() {
+		// Constructor is empty because use of Entity and SuperBuilder annotations
+	}
 }

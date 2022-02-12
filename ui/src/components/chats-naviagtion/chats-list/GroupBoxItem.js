@@ -8,7 +8,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Badge from "@mui/material/Badge";
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -16,11 +15,10 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import { useDispatch, useSelector } from "react-redux";
 
 import { WsClientContext } from "../../../app/WsClientContext";
-import { CONVERSATION } from "../../../app/constants";
 
 import { chatResetNotifications } from "../../../reducers/chatsSlice";
 
-export default function ChatBoxItem(props) {
+export default function GroupBoxItem(props) {
   const [contextMenu, setContextMenu] = React.useState(null);
 
   const profile = useSelector((state) => state.profile);
@@ -75,8 +73,12 @@ export default function ChatBoxItem(props) {
 
   const handleClickedItem = async (chatId, type) => {
     dispatch(chatResetNotifications({ chatId }));
-    if (type === CONVERSATION) wsClient.send(`/conversations/get/${chatId}/user/${profile.sessionId}`, {}, {});
-    else wsClient.send(`/groups/get/${chatId}/user/${profile.sessionId}`, {}, {});
+    wsClient.send(`/groups/get/${chatId}/user/${profile.sessionId}`, {}, {});
+  };
+
+  const getAnchorPosition = () => {
+    if (contextMenu !== null) return { top: contextMenu.mouseY, left: contextMenu.mouseX };
+    return undefined;
   };
 
   return (
@@ -90,37 +92,41 @@ export default function ChatBoxItem(props) {
     >
       <ListItemAvatar>
         <Avatar alt="User Profile Pic" src={props.chat?.photo}>
-          {props.chat.type === CONVERSATION ? <AccountCircleIcon /> : <GroupsIcon />}
+          <GroupsIcon />
         </Avatar>
       </ListItemAvatar>
-      <Stack sx={{ width: "75%" }}>
+      <Stack sx={{ width: "75%", whiteSpace: "nowrap" }}>
         <Typography variant="h6"> {props.chat.name} </Typography>
-        {props.chat.lastMessage ? (
-          <Stack direction="row" spacing={1} sx={{ textOverflow: "ellipsis", width: "90%", overflow: "hidden" }}>
-            {props.chat.type !== CONVERSATION ? (
-              <Typography
-                sx={{ display: "inline", width: "fit-content" }}
-                component="span"
-                variant="subtitle1"
-                color="text.primary"
-              >
-                {profile.userId !== props.chat.lastMessage.authorId ? props.chat.lastMessage.authorName + ":" : "Me:"}
+        {(() => {
+          if (props.chat.lastMessage) {
+            return (
+              <Stack direction="row" spacing={1} sx={{ textOverflow: "ellipsis", width: "90%", overflow: "hidden" }}>
+                <Typography
+                  sx={{ display: "inline", width: "fit-content" }}
+                  component="span"
+                  variant="subtitle1"
+                  color="text.primary"
+                >
+                  {profile.userId !== props.chat.lastMessage.authorId ? props.chat.lastMessage.authorName + ":" : "Me:"}
+                </Typography>
+                <Typography
+                  component="span"
+                  variant="subtitle1"
+                  color="text.primary"
+                  sx={{ width: "fit-content", textOverflow: "ellipsis", overflow: "hidden" }}
+                >
+                  {props.chat.lastMessage.content}
+                </Typography>
+              </Stack>
+            );
+          } else {
+            return (
+              <Typography sx={{ display: "inline" }} component="span" variant="body2" color="text.primary">
+                There are currently no messages in this group.
               </Typography>
-            ) : null}
-            <Typography
-              component="span"
-              variant="subtitle1"
-              color="text.primary"
-              sx={{ width: "fit-content", textOverflow: "ellipsis", overflow: "hidden" }}
-            >
-              {props.chat.lastMessage.content}
-            </Typography>{" "}
-          </Stack>
-        ) : (
-          <Typography sx={{ display: "inline" }} component="span" variant="body2" color="text.primary">
-            {`There are currently no messages in this ${props.chat.type === CONVERSATION ? "conversation" : "group"}.`}
-          </Typography>
-        )}
+            );
+          }
+        })()}
       </Stack>
 
       <ListItemSecondaryAction>
@@ -147,30 +153,18 @@ export default function ChatBoxItem(props) {
           </div>
         </Stack>
       </ListItemSecondaryAction>
-      {props.chat.type === CONVERSATION ? (
-        <Menu
-          open={contextMenu !== null}
-          onClose={handleCloseMenu}
-          anchorReference="anchorPosition"
-          anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
-        >
-          <MenuItem onClick={handleMenuGetOut}>Get out of this conversation</MenuItem>
-          <MenuItem onClick={handleMenuChangeChatName}>{`Change conversation's ${props.chat.name} name`}</MenuItem>
-        </Menu>
-      ) : (
-        <Menu
-          open={contextMenu !== null}
-          onClose={handleCloseMenu}
-          anchorReference="anchorPosition"
-          anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
-        >
-          <MenuItem onClick={handleMenuGetOut}>Get out of this group</MenuItem>
-          <MenuItem onClick={handleMenuAddUsers}>Add new users to group</MenuItem>
-          <MenuItem onClick={handleMenuPushOut}>Delete users from group</MenuItem>
-          <MenuItem onClick={handleMenuChangeChatName}>{`Change group's ${props.chat.name} name`}</MenuItem>
-          <MenuItem onClick={handleMenuChangeGroupPhoto}>{`Change group's ${props.chat.name} photo`}</MenuItem>
-        </Menu>
-      )}
+      <Menu
+        open={contextMenu !== null}
+        onClose={handleCloseMenu}
+        anchorReference="anchorPosition"
+        anchorPosition={getAnchorPosition()}
+      >
+        <MenuItem onClick={handleMenuGetOut}>Get out of this group</MenuItem>
+        <MenuItem onClick={handleMenuAddUsers}>Add new users to group</MenuItem>
+        <MenuItem onClick={handleMenuPushOut}>Delete users from group</MenuItem>
+        <MenuItem onClick={handleMenuChangeChatName}>{`Change group's ${props.chat.name} name`}</MenuItem>
+        <MenuItem onClick={handleMenuChangeGroupPhoto}>{`Change group's ${props.chat.name} photo`}</MenuItem>
+      </Menu>
     </ListItemButton>
   );
 }

@@ -23,11 +23,16 @@ const appBarStyles = makeStyles((theme) => ({
   },
   profile: {
     boxSizing: "border-box",
-    margin: "5%",
+    // margin: "5%",
     display: "flex",
     height: "100%",
     flexDirection: "row",
     justifyContent: "space-evenly",
+    alignItems: "center",
+  },
+  buttonsBox: {
+    display: "flex",
+    justifyContent: "center",
     alignItems: "center",
   },
 }));
@@ -50,7 +55,7 @@ export default function MyAppBar(props) {
 
   return (
     <div>
-      <AppBar position="fixed">
+      <AppBar position="fixed" sx={{ height: "7%" }}>
         <Toolbar className={classes.appBar}>
           <Grid container sx={{ height: "100%" }}>
             <Grid item xs></Grid>
@@ -61,7 +66,7 @@ export default function MyAppBar(props) {
               </Avatar>
             </Grid>
             <Grid item xs></Grid>
-            <Grid item xs={1}>
+            <Grid item xs={1} className={classes.buttonsBox}>
               <IconButton aria-label="dark-light-mode" onClick={lightingMode} sx={{ color: "yellow" }}>
                 {theme.palette.mode === "dark" ? <Brightness5Icon /> : <Brightness2Icon />}
               </IconButton>

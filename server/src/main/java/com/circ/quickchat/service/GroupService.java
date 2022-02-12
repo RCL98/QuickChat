@@ -1,24 +1,30 @@
 package com.circ.quickchat.service;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
+
 import DTO.MessageDTO;
 import DTO.NotificationDTO;
-import com.circ.quickchat.entity.*;
+import com.circ.quickchat.repositories.MessageRepository;
+import org.springframework.stereotype.Service;
+
+import com.circ.quickchat.entity.Chat;
+import com.circ.quickchat.entity.Group;
+import com.circ.quickchat.entity.Message;
+import com.circ.quickchat.entity.Photo;
+import com.circ.quickchat.entity.User;
 import com.circ.quickchat.repositories.ChatRepository;
 import com.circ.quickchat.repositories.GroupRepository;
 import com.circ.quickchat.utils.Alerts.ChatAlert;
 import com.circ.quickchat.utils.communcation.UserUtilCommun;
 import com.circ.quickchat.websocket.WebsocketMessage;
+
 import constant.MessageType;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -34,11 +40,13 @@ public class GroupService {
 
     private final UserService userService;
 
+    private final MessageRepository messageRepository;
+
     @Transactional
     public void sendMessage(Message message, String sessionIdAuthor) {
         Chat chat = chatRepository.findById(message.getChat().getId()).orElseThrow(() -> new InternalError(
                 String.format("A chat with id: %d doesn't exist!", message.getId())));
-        chat.getMessages().add(message);
+        chat.getMessages().add(messageRepository.save(message));
         chatRepository.save(chat);
         List<String> usersFromChatWithoutAuthor = new ArrayList<>();
         List<String> usersFromChatNotOn = new ArrayList<>();
@@ -87,14 +95,11 @@ public class GroupService {
         userService.saveAll(
                 group.getChat().getUsers().stream()
                         .filter(usr -> usr.getCurrentChat() != null && usr.getCurrentChat().equals(group.getChat()))
-                        .map(usr -> { usr.setCurrentChat(null); return usr; }).collect(Collectors.toList()));
+                        .peek(usr -> usr.setCurrentChat(null)).collect(Collectors.toList()));
         Photo photo = group.getPhoto();
         if (photo != null) {
-            try {
-                Files.delete(Paths.get(photo.getBigPhotoUri()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            File deleteFile = new File(photo.getBigPhotoUri());
+            deleteFile.delete();
         }
         groupRepository.delete(group);
     }

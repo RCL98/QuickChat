@@ -1,22 +1,22 @@
 package com.circ.quickchat.service;
 
-import DTO.UserDTO;
-import com.circ.quickchat.entity.Group;
-import com.circ.quickchat.entity.Photo;
-import com.circ.quickchat.entity.User;
-import com.circ.quickchat.repositories.UserRepository;
-import com.circ.quickchat.utils.Alerts.ChatAlert;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.circ.quickchat.entity.Group;
+import com.circ.quickchat.entity.Photo;
+import com.circ.quickchat.entity.User;
+import com.circ.quickchat.repositories.UserRepository;
+import com.circ.quickchat.utils.Alerts.ChatAlert;
+
+import DTO.UserDTO;
 
 @Service
 public class UserService {
@@ -70,11 +70,8 @@ public class UserService {
         chaConversationInfoService.deleteAll(chaConversationInfoService.findAllByUserId(user.getId()));
         Photo photo = user.getPhoto();
         if (photo != null) {
-            try {
-                Files.delete(Paths.get(photo.getBigPhotoUri()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            File deleteFile = new File(photo.getBigPhotoUri());
+            deleteFile.delete();
         }
         userRepository.deleteById(user.getId());
 

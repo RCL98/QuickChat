@@ -10,14 +10,14 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { useSelector, useDispatch } from "react-redux";
 
-import DraggablePaperComponent from "../../../app/DraggablePaperComponent";
-import { GROUP } from "../../../app/constants";
-import { WsClientContext } from "../../../app/WsClientContext";
+import DraggablePaperComponent from "../../../../app/DraggablePaperComponent";
+import { GROUP } from "../../../../app/constants";
+import { WsClientContext } from "../../../../app/WsClientContext";
 
-import { currentChatChanged } from "../../../reducers/profileSlice";
-import { chatDeleted } from "../../../reducers/chatsSlice";
-import { updateMessagesList } from "../../../reducers/messagesSlice";
-import { usersListUpdated } from "../../../reducers/usersSlice";
+import { currentChatChanged } from "../../../../reducers/profileSlice";
+import { chatDeleted } from "../../../../reducers/chatsSlice";
+import { updateMessagesList } from "../../../../reducers/messagesSlice";
+import { usersListUpdated } from "../../../../reducers/usersSlice";
 
 export default function GetOutOfChatDialog(props) {
   const wsClient = React.useContext(WsClientContext);
