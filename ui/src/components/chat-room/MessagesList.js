@@ -27,24 +27,35 @@ export default function MessagesList() {
   const profile = useSelector((state) => state.profile);
 
   const [currentChat, setCurrentChat] = React.useState(null);
+  const [isDown, setIsDown] = React.useState(true);
+  const [currentNumberMessages, setCurrentNumberMessages] = React.useState(messages.length);
 
   const classes = messagesListStyles();
+
+  const handleScroll = (event) => {
+    setIsDown(
+      ((event.currentTarget.scrollHeight - event.currentTarget.scrollTop - event.currentTarget.clientHeight) /
+        event.currentTarget.scrollHeight) *
+        100 <=
+        8
+    );
+  };
 
   useEffect(() => {
     if (currentChat !== profile.currentChatId) {
       setCurrentChat(profile.currentChatId);
       document.getElementById("last").scrollIntoView(true);
     } else if (
-      Array.isArray(messages) &&
-      messages.length &&
-      messages[messages.length - 1].authorId === profile.userId
+      currentNumberMessages < messages.length &&
+      (isDown || messages[messages.length - 1].authorId === profile.userId)
     ) {
+      setCurrentNumberMessages(messages.length);
       document.getElementById("last").scrollIntoView(true);
     }
-  }, [messages, currentChat, profile]);
+  }, [messages, currentChat, profile, isDown, currentNumberMessages]);
 
   return (
-    <div className={classes.messagesList}>
+    <div className={classes.messagesList} onScroll={handleScroll}>
       {messages.map((msg) => (
         <MessageBox
           key={msg.id}

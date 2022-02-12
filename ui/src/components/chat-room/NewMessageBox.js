@@ -35,7 +35,6 @@ export default function NewMessageBox() {
     window.clearTimeout(timer);
     setTimer(
       window.setTimeout(() => {
-        console.log("Stopped");
         wsClient.send("/stopped-writing", {}, {});
         setIsWriting(false);
       }, timeout)

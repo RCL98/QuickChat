@@ -53,9 +53,11 @@ export default function ConvBoxItem(props) {
     props.dialogName.setter(true);
   };
 
-  const handleClickedItem = async (chatId, type) => {
-    dispatch(chatResetNotifications({ chatId }));
-    wsClient.send(`/conversations/get/${chatId}/user/${profile.sessionId}`, {}, {});
+  const handleClickedItem = async (chatId, _type) => {
+    if (chatId !== profile.currentChatId) {
+      dispatch(chatResetNotifications({ chatId }));
+      wsClient.send(`/conversations/get/${chatId}/user/${profile.sessionId}`, {}, {});
+    }
   };
 
   const getAnchorPosition = () => {
