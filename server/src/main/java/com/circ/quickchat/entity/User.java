@@ -43,6 +43,9 @@ public class User {
 	@JoinColumn(name = "current_chat_id")
 	@JsonIgnoreProperties({"users", "messages"})
 	private Chat currentChat;
+	
+	@Column(name = "available")
+	private Boolean available;
 
 /*	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinTable(name = "users_to_chat",

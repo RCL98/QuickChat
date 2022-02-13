@@ -1,8 +1,9 @@
-delete from messages;
-delete from users_to_chat;
-delete from groups;
-delete from conversation_info;
-delete from conversations;
-delete from chats;
-delete from users;
-delete from photos;
+drop table messages;
+drop table users_to_chat;
+drop table groups;
+drop table conversation_info;
+drop table conversations;
+drop table chats;
+drop table uncatch_alert;
+drop table users;
+drop table photos;

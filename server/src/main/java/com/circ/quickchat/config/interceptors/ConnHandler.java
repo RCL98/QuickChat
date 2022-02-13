@@ -39,15 +39,16 @@ public class ConnHandler extends WebSocketHandlerDecorator {
 
 		String sessionId = session.getAttributes().get("sessionId").toString();
 		User user = userService.getUserBySessionId(sessionId);
-		List<Group> groups = groupService.getChatThatContainsUser(user);
-		List<Conversation> conversations = conversationService.getConversationThatContainsUser(user);
-		if (groups != null) {
-			groups.forEach(group -> groupService.deleteUserInGroup(group, user));
-		}
-		if (conversations != null) {
-			conversations.forEach(conversation -> conversationService.deleteUserInConversation(conversation, user));
-		}
-		userService.deleteUser(user);
+		userService.goOfflineUser(user);
+//		List<Group> groups = groupService.getChatThatContainsUser(user);
+//		List<Conversation> conversations = conversationService.getConversationThatContainsUser(user);
+//		if (groups != null) {
+//			groups.forEach(group -> groupService.deleteUserInGroup(group, user));
+//		}
+//		if (conversations != null) {
+//			conversations.forEach(conversation -> conversationService.deleteUserInConversation(conversation, user));
+//		}
+//		userService.deleteUser(user);
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.circ.quickchat.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,30 +42,41 @@ public class GroupService {
     private final UserService userService;
 
     private final MessageRepository messageRepository;
+    
+    private final UncatchAlertService uncatchAlertService;
 
     @Transactional
     public void sendMessage(Message message, String sessionIdAuthor) {
         Chat chat = chatRepository.findById(message.getChat().getId()).orElseThrow(() -> new InternalError(
                 String.format("A chat with id: %d doesn't exist!", message.getId())));
+        //TODO sarver no longer need to save messages
         chat.getMessages().add(messageRepository.save(message));
         chatRepository.save(chat);
         List<String> usersFromChatWithoutAuthor = new ArrayList<>();
         List<String> usersFromChatNotOn = new ArrayList<>();
-        chat.getUsers().forEach(user -> {
-            if (!user.getSessionId().equals(sessionIdAuthor)) {
-                if (user.getCurrentChat() != null && user.getCurrentChat().getId().equals(chat.getId())) {
-                    usersFromChatWithoutAuthor.add(user.getSessionId());
-                } else {
-                    usersFromChatNotOn.add(user.getSessionId());
-                }
-            }
-        });
         MessageDTO messageDTO = message.toMessageDTO();
         WebsocketMessage websocketMessage = WebsocketMessage.builder().messageType(MessageType.MESSAGE)
                 .content(messageDTO).build();
         WebsocketMessage websocketNotification = WebsocketMessage.builder().messageType(MessageType.NOTIFICATION)
                 .content(NotificationDTO.builder().chatId(chat.getId())
                         .message(messageDTO).build()).build();
+        chat.getUsers().forEach(user -> {
+            if (!user.getSessionId().equals(sessionIdAuthor)) {
+            	if (user.getAvailable()) {
+	                if (user.getCurrentChat() != null && user.getCurrentChat().getId().equals(chat.getId())) {
+	                    usersFromChatWithoutAuthor.add(user.getSessionId());
+	                } else {
+	                    usersFromChatNotOn.add(user.getSessionId());
+	                }
+            	} else {
+            		try {
+						uncatchAlertService.saveWsMessageForUser(websocketNotification, user);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+            	}
+            }
+        });
         userUtilCommun.sendToUsers(websocketMessage, usersFromChatWithoutAuthor);
         userUtilCommun.sendToUsers(websocketNotification, usersFromChatNotOn);
     }

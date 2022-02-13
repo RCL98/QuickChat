@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import com.circ.quickchat.entity.User;
 import com.circ.quickchat.service.UserService;
 
 @Component
@@ -28,7 +29,9 @@ public class NewConnInterceptor implements HandshakeInterceptor{
 		if (queryParams.containsKey("sessionId")) {
 			String sessionId = queryParams.get("sessionId")[0];
 			attributes.put("sessionId", sessionId);
-			userService.getUserBySessionId(sessionId);
+			User user = userService.getUserBySessionId(sessionId);
+			user.setAvailable(true);
+			userService.save(user);
 		}
 		return true;
 	}

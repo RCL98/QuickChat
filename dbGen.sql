@@ -4,7 +4,8 @@ CREATE TABLE "users" (
   "created_at" timestamp,
   "photo_profile_id" bigint,
   "session_id" varchar(120),
-  "current_chat_id" bigint
+  "current_chat_id" bigint,
+  "available" BOOLEAN
 );
 
 CREATE TABLE "photos" (
@@ -52,6 +53,15 @@ CREATE TABLE "users_to_chat" (
   "user_id" bigint,
   "chat_id" bigint
 );
+
+CREATE TABLE "uncatch_alert" (
+  "id" serial PRIMARY KEY,
+  "user_id" bigint,
+  "alert_content" TEXT,
+  "created_at" timestamp DEFAULT NOW()
+);
+
+ALTER TABLE "uncatch_alert" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "users" ADD FOREIGN KEY ("photo_profile_id") REFERENCES "photos" ("id");
 

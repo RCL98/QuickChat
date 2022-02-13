@@ -44,6 +44,12 @@ public class UserService {
         }
         groupService.save(chat);
     }
+    
+    public void goOfflineUser(User user) {
+    	user.setAvailable(false);
+    	save(user);
+    	//TODO alert another users that he is offline
+    }
 
     public Group addUsersInNewChat(Group group, List<Long> usersId) {
         group.getChat().setUsers(new HashSet<>());
