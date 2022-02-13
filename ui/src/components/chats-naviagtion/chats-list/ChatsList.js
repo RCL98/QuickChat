@@ -68,6 +68,7 @@ export default function ChatsList(props) {
           labelId={_labelId}
           dialogName={{ value: openNameDialog, setter: setOpenNameDialog }}
           dialogGetOut={{ value: openGetOutDialog, setter: setOpenGetOutDialog }}
+          setChosenChat={setChosenChat}
         />
       );
     }

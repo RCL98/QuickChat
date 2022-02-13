@@ -143,7 +143,7 @@ export default function ConvBoxItem(props) {
         anchorPosition={getAnchorPosition()}
       >
         <MenuItem onClick={handleMenuGetOut}>Get out of this conversation</MenuItem>
-        <MenuItem onClick={handleMenuChangeChatName}>{`Change conversation's ${props.chat.name} name`}</MenuItem>
+        <MenuItem onClick={handleMenuChangeChatName}>Change conversation's name</MenuItem>
       </Menu>
     </ListItemButton>
   );
