@@ -42,6 +42,7 @@ export default function MyAppBar(props) {
   const [openSettings, setOpenSettings] = React.useState(false);
 
   const theme = useTheme();
+  console.log(theme);
 
   const profile = useSelector((state) => state.profile);
 

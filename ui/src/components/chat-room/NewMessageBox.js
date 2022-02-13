@@ -25,20 +25,22 @@ export default function NewMessageBox() {
   const onContentChanged = (event) => setContent(event.target.value);
 
   const startedWriting = () => {
-    if (!isWriting) {
+    if (!isWriting && profile.currentChatId !== null) {
       setIsWriting(true);
       wsClient.send("/writing", {}, {});
     }
   };
 
   const stoppedWriting = () => {
-    window.clearTimeout(timer);
-    setTimer(
-      window.setTimeout(() => {
-        wsClient.send("/stopped-writing", {}, {});
-        setIsWriting(false);
-      }, timeout)
-    );
+    if (profile.currentChatId !== null) {
+      window.clearTimeout(timer);
+      setTimer(
+        window.setTimeout(() => {
+          wsClient.send("/stopped-writing", {}, {});
+          setIsWriting(false);
+        }, timeout)
+      );
+    }
   };
 
   const onSubmit = () => {
@@ -61,7 +63,7 @@ export default function NewMessageBox() {
           createdAt: timestamp,
         };
         wsClient.send("/chat", {}, JSON.stringify(msgExt));
-      } else console.log("Client not defined!");
+      } else console.log("Client not defined or current chat is null!");
     }
     setContent("");
   };

@@ -4,10 +4,9 @@ import "./styles/App.css";
 import { Provider } from "react-redux";
 import store from "./app/store";
 
+import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import CssBaseline from "@mui/material/CssBaseline";
-import darkScrollbar from "@mui/material/darkScrollbar";
 
 import ChatRoom from "./components/chat-room/ChatRoom";
 import MyAppBar from "./components/app-bar/MyAppBar";
@@ -28,11 +27,6 @@ export default function App() {
           },
         },
         components: {
-          MuiCssBaseline: {
-            styleOverrides: {
-              body: mode === "dark" ? darkScrollbar() : null,
-            },
-          },
           MuiAppBar: {
             defaultProps: {
               enableColorOnDark: true,
@@ -46,7 +40,6 @@ export default function App() {
   const lightingMode = () => {
     setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
   };
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

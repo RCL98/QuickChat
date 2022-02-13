@@ -3,7 +3,6 @@ import MessageBox from "./MessageBox";
 
 import { useSelector } from "react-redux";
 
-import Box from "@mui/material/Box";
 import { makeStyles } from "@mui/styles";
 
 const messagesListStyles = makeStyles((theme) => {
@@ -11,6 +10,29 @@ const messagesListStyles = makeStyles((theme) => {
     messagesList: {
       maxHeight: "100%",
       overflowY: "auto",
+      padding: "1%",
+      scrollbarColor: "#6b6b6b #2b2b2b",
+      "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
+        width: "10px",
+        background: "transparent",
+      },
+      "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
+        borderRadius: 8,
+        backgroundColor: "#6b6b6b",
+        minHeight: 24,
+      },
+      "&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus": {
+        backgroundColor: "#959595",
+      },
+      "&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active": {
+        backgroundColor: "#959595",
+      },
+      "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
+        backgroundColor: "#959595",
+      },
+      "&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner": {
+        backgroundColor: "#2b2b2b",
+      },
     },
     box: {
       width: "100%",
@@ -64,9 +86,9 @@ export default function MessagesList() {
           createdAt={msg.createdAt}
         />
       ))}
-      <Box className={classes.box}>
+      <div className={classes.box}>
         <div id="last" />
-      </Box>
+      </div>
     </div>
   );
 }

@@ -153,6 +153,7 @@ const WsClientContextProvider = ({ children }) => {
   const [wsClient, setWsClient] = useState(null);
 
   useEffect(() => {
+    console.log("Start");
     axios
       .post(constants.serverHost + "/user/create", {
         name: store.getState().profile.username,
@@ -185,7 +186,7 @@ const WsClientContextProvider = ({ children }) => {
   const whatToRender = () => {
     if (isConnected) {
       // the Provider gives access to the context to its children
-      return <WsClientContext.Provider value={wsClient}>{children};</WsClientContext.Provider>;
+      return <WsClientContext.Provider value={wsClient}>{children}</WsClientContext.Provider>;
     }
     return (
       <div
