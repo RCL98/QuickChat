@@ -162,8 +162,8 @@ export default function GroupBoxItem(props) {
         <MenuItem onClick={handleMenuGetOut}>Get out of this group</MenuItem>
         <MenuItem onClick={handleMenuAddUsers}>Add new users to group</MenuItem>
         <MenuItem onClick={handleMenuPushOut}>Delete users from group</MenuItem>
-        <MenuItem onClick={handleMenuChangeChatName}>{`Change group's ${props.chat.name} name`}</MenuItem>
-        <MenuItem onClick={handleMenuChangeGroupPhoto}>{`Change group's ${props.chat.name} photo`}</MenuItem>
+        <MenuItem onClick={handleMenuChangeChatName}>Change group's name</MenuItem>
+        <MenuItem onClick={handleMenuChangeGroupPhoto}>Change group's photo</MenuItem>
       </Menu>
     </ListItemButton>
   );

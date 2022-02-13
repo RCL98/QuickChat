@@ -20,7 +20,7 @@
   width: 100%;
   padding: 1%;
   max-width: 100%;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: clip;
   border-radius: 15px;
   border-style: groove;

@@ -1,6 +1,9 @@
 import React from "react";
+
 import OptionsBar from "./OptionsBar";
 import ChatsList from "./chats-list/ChatsList";
+
+import { Stack } from "@mui/material";
 
 export default function ChatNavigation() {
   const [filterText, setFilterText] = React.useState("");
@@ -10,18 +13,12 @@ export default function ChatNavigation() {
   };
 
   return (
-    <div>
-      <div id="search">
-        <OptionsBar handleSeacrh={handleSeacrh} filterText={filterText} />
-      </div>
-
-      <div id="chats-divider">
-        <hr style={{ width: "95%" }} />
-      </div>
-
-      <div id="chats-list" style={{ justifyContent: "center", alignItems: "center" }}>
+    <Stack sx={{ overflow: "hidden", height: "100%" }}>
+      <OptionsBar handleSeacrh={handleSeacrh} filterText={filterText} />
+      <hr style={{ width: "95%" }} />
+      <div id="chats-list" style={{ display: "flex", height: "85%" }}>
         <ChatsList filterText={filterText} />
       </div>
-    </div>
+    </Stack>
   );
 }
