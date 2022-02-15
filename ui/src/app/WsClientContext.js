@@ -25,8 +25,9 @@ import { currentChatChanged, sessionIdChanged, userIdChanged } from "../reducers
 import * as constants from "./constants";
 import getUsersAvatars from "./getUsersAvatars";
 
-import SockJS from "sockjs-client/dist/sockjs";
-import Stomp from "stompjs";
+import SockJS from "sockjs-client";
+import { Stomp } from "@stomp/stompjs";
+import { Buffer } from "buffer";
 import axios from "axios";
 
 // create context
