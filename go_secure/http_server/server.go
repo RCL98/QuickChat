@@ -26,7 +26,7 @@ const (
 	REMOVE_USER_IN_CHAT = "REMOVE_USER_IN_CHAT"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 
 type Secure_Server struct {
 	Port string
@@ -160,8 +160,8 @@ func getChat(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func createWsConnection(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+func createWsConnection(w http.ResponseWriter, req *http.Request) {
+	conn, err := upgrader.Upgrade(w, req, nil)
 
 	isFirstPackage := true
 
@@ -175,17 +175,21 @@ func createWsConnection(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			utils.Logg(err)
+			conn.Close()
+			return
 		}
 
 		reciveMessage := deserialize(content_bytes)
-
+		fmt.Print(string(content_bytes))
 		if reciveMessage.MessageType != AUTHENTICATION && isFirstPackage {
+			conn.Close()
 			return
 		}
 
 		switch reciveMessage.MessageType {
 		case AUTHENTICATION:
 			if !handleAuthentication(reciveMessage) {
+				conn.Close()
 				return
 			}
 			isFirstPackage = false
@@ -208,6 +212,8 @@ func createWsConnection(w http.ResponseWriter, r *http.Request) {
 		case ADD_SESSION_ID:
 			handleAddSessionId(reciveMessage)
 
+		default:
+			fmt.Print("UNKNOWN MESSAGE")
 		}
 
 	}

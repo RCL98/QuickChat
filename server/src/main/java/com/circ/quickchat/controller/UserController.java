@@ -1,6 +1,7 @@
 package com.circ.quickchat.controller;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +34,26 @@ public class UserController {
 	@PostMapping("/user/create")
 	public User createTemporaryUser(@RequestBody User user) {
 		user.setSessionId(UUID.randomUUID().toString());
+		user.setIsTemp(true);
 		return userService.save(user);
 	}
 
 	@GetMapping("/user/auth/{sessionId}")
-	public User createTemporaryUser(@PathVariable String sessionId) {
+	public User getRegisteredUser(@PathVariable String sessionId) {
 		return userService.getUserBySessionId(sessionId);
 	}
-	
+
+	@MessageMapping("/user/register")
+	public void userRegister(SimpMessageHeaderAccessor  headerAccessor) {
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
+		User user = userService.getUserBySessionId(sessionId);
+		user.setIsTemp(false);
+		userService.save(user);
+	}
+
 	@MessageMapping("/user/change/name")
 	public void processChangeUserName(String newName, SimpMessageHeaderAccessor  headerAccessor) {
-		String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
+		String sessionId = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("sessionId").toString();
 		User user = userService.getUserBySessionId(sessionId);
 		user.setName(newName);
 		User newUser = userService.save(user);

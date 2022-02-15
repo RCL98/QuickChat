@@ -1,11 +1,11 @@
-import { desktopApp } from "./constants";
+import { AUTHENTICATION } from "./constants";
 
-export default function connectWebSocketsDesktop() {
-  let socket = new WebSocket(desktopApp + "/connect-ws");
+export default function connectWebSocketsDesktop(authCode) {
+  let socket = new WebSocket("ws://localhost:8090/connect-ws");
 
   socket.onopen = function (e) {
     console.log("Connected to desktop app was successful.");
-    socket.send("My name is John");
+    socket.send(JSON.stringify({ Content: authCode, MessageType: AUTHENTICATION }));
   };
 
   socket.onmessage = function (event) {

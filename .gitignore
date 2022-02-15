@@ -14,7 +14,6 @@
 
 #photos
 /photoDir/*
-/photoDir
 
 # testing
 /ui/coverage
@@ -47,7 +46,7 @@
 !/server/**/src/test/**/target/
 
 #go_secure
-/go_secure/anonymous_quickhat
+/go_secure/anonymous_quickchat.db
 
 ### STS ###
 /server/.apt_generated

@@ -17,8 +17,7 @@ const WsClientContext = createContext();
 
 const WsClientContextProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [isRegistered, setIsRegistered] = useState(true);
+  const [openLoginDialog, setOpenLoginDialog] = useState(false);
   const [wsClient, setWsClient] = useState(null);
   const [wsDesktopClient, setWsDesktopClient] = useState(null);
 
@@ -43,7 +42,7 @@ const WsClientContextProvider = ({ children }) => {
       .then(function (response) {
         if (response.data === "I'm here") {
           console.log("Desktop app is on!");
-          setIsLoggedIn(false);
+          setOpenLoginDialog(true);
         }
       })
       .catch((error) => {
@@ -60,8 +59,7 @@ const WsClientContextProvider = ({ children }) => {
           value={{
             wsClient: wsClient,
             wsDesktopClient: wsDesktopClient,
-            setIsLoggedIn: setIsLoggedIn,
-            setIsRegistered: setIsRegistered,
+            setOpenLoginDialog: setOpenLoginDialog,
           }}
         >
           {children}
@@ -92,10 +90,7 @@ const WsClientContextProvider = ({ children }) => {
     <div id="context-div" style={{ width: "100%", height: "100%" }}>
       {whatToRender()}
       <LogInDialog
-        isLoggedIn={isLoggedIn}
-        setIsLoggedIn={setIsLoggedIn}
-        isRegistered={isRegistered}
-        setIsRegistered={setIsRegistered}
+        open={{ value: openLoginDialog, setter: setOpenLoginDialog }}
         wsClient={wsClient}
         setWsClient={setWsClient}
         setWsDesktopClient={setWsDesktopClient}

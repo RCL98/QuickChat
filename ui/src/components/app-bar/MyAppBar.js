@@ -44,8 +44,8 @@ export default function MyAppBar(props) {
   const classes = appBarStyles();
   const [openSettings, setOpenSettings] = React.useState(false);
 
-  const setIsRegistered = React.useContext(WsClientContext).setIsRegistered;
-  const setIsLoggedIn = React.useContext(WsClientContext).setIsLoggedIn;
+  // const setIsRegistered = React.useContext(WsClientContext).setIsRegistered;
+  const setOpenLoginDialog = React.useContext(WsClientContext).setOpenLoginDialog;
 
   const theme = useTheme();
 
@@ -60,8 +60,9 @@ export default function MyAppBar(props) {
   };
 
   const clickedLock = () => {
-    setIsRegistered(false);
-    setIsLoggedIn(false);
+    setOpenLoginDialog(true);
+    // setIsRegistered(false);
+    // setIsLoggedIn(false);
   };
 
   return (

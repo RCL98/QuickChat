@@ -22,11 +22,11 @@ import connectWebSocketsDesktop from "./ConnectWebSocketsDesktop";
 import RegisterDialog from "./RegisterDialog";
 
 export default function LogInDialog(props) {
-  const [canceled, setCanceled] = React.useState(false);
   const [wrongPassword, setWrongPassword] = React.useState(false);
+  const [openRegisterDialog, setOpenRegisterDialog] = React.useState(false);
 
-  const handleCancel = () => {
-    setCanceled(true);
+  const handleClose = () => {
+    props.open.setter(false);
   };
 
   const connectToServer = (sessionId) => {
@@ -43,47 +43,57 @@ export default function LogInDialog(props) {
   };
 
   const handleLogin = () => {
-    console.log(document.getElementById("login-password").value);
+    let authCode = document.getElementById("login-password").value;
+    console.log(authCode);
     axios
       .post(desktopApp + "/login", {
-        authCode: document.getElementById("login-password").value,
+        authCode: authCode,
       })
       .then(function (response) {
         console.log(response);
         if (response.status === NOT_REGISTERED_STATUS) {
           changeToRegistration();
-        } else if (response.status === 511) {
-          setWrongPassword(true);
         } else if (response.status === 200) {
-          const sessionId = response.data.sessionId;
+          console.log(response.data);
+          const sessionId = response.data;
           store.dispatch(sessionIdChanged(sessionId));
 
-          let socket = connectWebSocketsDesktop();
+          let socket = connectWebSocketsDesktop(authCode);
           props.setWsDesktopClient(socket);
 
-          props.setIsLoggedIn(true);
+          props.open.setter(false);
+          console.log(sessionId);
+          console.log(props.wsClient);
           if (props.wsClient === null) {
             connectToServer(sessionId);
+          } else {
+            console.log("am intrat");
+            props.wsClient.send("/user/register", {}, {});
           }
         }
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        console.error(error);
+        if (error.response.status === 511) {
+          setWrongPassword(true);
+        }
+      });
   };
 
   const changeToRegistration = () => {
-    props.setIsRegistered(false);
+    setOpenRegisterDialog(true);
   };
 
   return (
     <div>
       <Dialog
-        open={!props.isLoggedIn && !canceled}
-        onClose={handleCancel}
+        open={props.open.value}
+        onClose={handleClose}
         aria-labelledby="login-dialog-title"
         aria-describedby="login-dialog-description"
         PaperComponent={DraggablePaperComponent}
       >
-        <DialogTitle id="login-dialog-title">LogIn</DialogTitle>
+        <DialogTitle id="login-dialog-title">Log in</DialogTitle>
         <DialogContent>
           <DialogContentText id="login-dialog-description">Input password</DialogContentText>
           <Box sx={{ display: "flex", alignItems: "flex-end" }}>
@@ -108,12 +118,12 @@ export default function LogInDialog(props) {
           <Button onClick={handleLogin} autoFocus>
             Login
           </Button>
-          <Button onClick={handleCancel} autoFocus>
+          <Button onClick={handleClose} autoFocus>
             Cancel
           </Button>
         </DialogActions>
       </Dialog>
-      <RegisterDialog isRegistered={props.isRegistered} setIsRegistered={props.setIsRegistered} />
+      <RegisterDialog open={{ value: openRegisterDialog, setter: setOpenRegisterDialog }} />
     </div>
   );
 }

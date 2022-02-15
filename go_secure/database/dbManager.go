@@ -2,11 +2,12 @@ package database
 
 import (
 	"go_secure/utils"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-const dbName = "anonymous_quickhat"
+const dbName = "anonymous_quickchat.db"
 
 var dbConn *gorm.DB
 
