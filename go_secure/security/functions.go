@@ -18,5 +18,5 @@ func ValidateAuthentication(w http.ResponseWriter, req *http.Request) bool {
 
 func ValidateAuthCode(authCode string) bool {
 	authToken := database.GetSecurityValue(AUTH_TOKEN)
-	return true || authToken == authCode
+	return authToken == authCode
 }

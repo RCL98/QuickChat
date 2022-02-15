@@ -23,7 +23,7 @@ export default function GroupBoxItem(props) {
 
   const profile = useSelector((state) => state.profile);
 
-  const wsClient = React.useContext(WsClientContext);
+  const wsClient = React.useContext(WsClientContext).wsClient;
 
   const dispatch = useDispatch();
 

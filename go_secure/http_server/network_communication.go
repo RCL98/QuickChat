@@ -3,12 +3,13 @@ package http_server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"go_secure/database"
 	"go_secure/security"
 	"go_secure/utils"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type Child struct {
@@ -100,7 +101,7 @@ func getSessionId(w http.ResponseWriter, req *http.Request) {
 	sessionId := database.GetSecurityValue(security.SESSION_ID)
 	if len(sessionId) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("You have to add a sessionId firstly!"))
+		w.Write([]byte("You have to add a sessionId first!"))
 		return
 	}
 	w.Write([]byte(sessionId))

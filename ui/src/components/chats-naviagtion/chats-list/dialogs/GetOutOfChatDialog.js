@@ -20,7 +20,7 @@ import { updateMessagesList } from "../../../../reducers/messagesSlice";
 import { usersListUpdated } from "../../../../reducers/usersSlice";
 
 export default function GetOutOfChatDialog(props) {
-  const wsClient = React.useContext(WsClientContext);
+  const wsClient = React.useContext(WsClientContext).wsClient;
 
   const currentChatId = useSelector((state) => state.profile.currentChatId);
 

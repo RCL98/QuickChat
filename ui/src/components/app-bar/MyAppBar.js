@@ -11,9 +11,12 @@ import Brightness2Icon from "@mui/icons-material/Brightness2";
 import Brightness5Icon from "@mui/icons-material/Brightness5";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Avatar from "@mui/material/Avatar";
+import LockIcon from "@mui/icons-material/Lock";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import UserProfileDialog from "./UserProfileDialog";
+
+import { WsClientContext } from "../../app/WsClientContext";
 
 import { useSelector } from "react-redux";
 
@@ -41,6 +44,9 @@ export default function MyAppBar(props) {
   const classes = appBarStyles();
   const [openSettings, setOpenSettings] = React.useState(false);
 
+  const setIsRegistered = React.useContext(WsClientContext).setIsRegistered;
+  const setIsLoggedIn = React.useContext(WsClientContext).setIsLoggedIn;
+
   const theme = useTheme();
 
   const profile = useSelector((state) => state.profile);
@@ -51,6 +57,11 @@ export default function MyAppBar(props) {
 
   const clickedSettings = () => {
     setOpenSettings(true);
+  };
+
+  const clickedLock = () => {
+    setIsRegistered(false);
+    setIsLoggedIn(false);
   };
 
   return (
@@ -70,8 +81,11 @@ export default function MyAppBar(props) {
               <IconButton aria-label="dark-light-mode" onClick={lightingMode} sx={{ color: "yellow" }}>
                 {theme.palette.mode === "dark" ? <Brightness5Icon /> : <Brightness2Icon />}
               </IconButton>
-              <IconButton aria-label="dark-light-mode" sx={{ color: "white" }} onClick={clickedSettings}>
+              <IconButton aria-label="settings" sx={{ color: "white" }} onClick={clickedSettings}>
                 <SettingsIcon />
+              </IconButton>
+              <IconButton aria-label="security-mode" sx={{ color: "white" }} onClick={clickedLock}>
+                <LockIcon />
               </IconButton>
             </Grid>
           </Grid>

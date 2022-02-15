@@ -1,5 +1,6 @@
 import axios from "axios";
 import { serverHost } from "./constants";
+import { Buffer } from "buffer";
 
 export default async function getUsersAvatars(_users, setUsers, setRenderedUsers) {
   for (let i = 0; i < _users.length; i++) {

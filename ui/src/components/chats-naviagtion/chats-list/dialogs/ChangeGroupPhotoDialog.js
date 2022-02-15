@@ -28,6 +28,7 @@ import axios from "axios";
 
 export default function ChangeGroupPhotoDialog(props) {
   const sessionId = useSelector((state) => state.profile.sessionId);
+
   const [groupPhoto, setGroupPhoto] = React.useState(props.chat?.photo);
   const [uploadPhoto, setUploadPhoto] = React.useState(null);
   const [openCropPhotoDialog, setOpenCropPhotoDialog] = React.useState(false);

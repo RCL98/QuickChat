@@ -46,8 +46,12 @@ public class UserService {
     }
     
     public void goOfflineUser(User user) {
-    	user.setAvailable(false);
-    	save(user);
+        if (user.getIsTemp()) {
+            deleteUser(user);
+        } else {
+            user.setAvailable(false);
+            save(user);
+        }
     	//TODO alert another users that he is offline
     }
 

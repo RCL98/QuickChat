@@ -1,6 +1,7 @@
 CREATE TABLE "users" (
   "id" serial PRIMARY KEY,
   "name" varchar(20),
+  "is_temp" BOOLEAN DEFAULT TRUE,
   "created_at" timestamp,
   "photo_profile_id" bigint,
   "session_id" varchar(120),

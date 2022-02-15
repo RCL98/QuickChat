@@ -31,7 +31,9 @@ import axios from "axios";
 
 export default function UserProfileDialog(props) {
   const profile = useSelector((state) => state.profile);
-  const wsClient = React.useContext(WsClientContext);
+
+  const wsClient = React.useContext(WsClientContext).wsClient;
+
   const [auxUsername, setAuxUsername] = React.useState(profile.username);
   const [avatar, setAvatar] = React.useState(profile.avatar);
   const [uploadPhoto, setUploadPhoto] = React.useState(null);

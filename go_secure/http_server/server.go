@@ -3,14 +3,15 @@ package http_server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 	"go_secure/database"
 	"go_secure/security"
 	"go_secure/utils"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -31,9 +32,45 @@ type Secure_Server struct {
 	Port string
 }
 
-func login(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
+func enableCORS(w *http.ResponseWriter, req *http.Request) bool {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	if req.Method == http.MethodOptions {
+		(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Authorization,  X-Requested-With")
+		(*w).Header().Set("Access-Control-Allow-Credentials", "true")
+		(*w).WriteHeader(http.StatusOK)
+		return true
+	}
+	return false
+}
+
+func verifyIsOn(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	if req.Method != http.MethodGet {
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte("I'm here"))
+}
+
+func login(w http.ResponseWriter, req *http.Request) {
+
+	fmt.Println(req.Method)
+	if req.Method != http.MethodPost && req.Method != http.MethodOptions {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if enableCORS(&w, req) {
+		return
+	}
+
+	res := database.GetSecurityValue(security.AUTH_TOKEN)
+	if len(res) == 0 {
+		w.WriteHeader(security.NOT_REGISTERED_STATUS)
+		w.Write([]byte("You are not registered!"))
 		return
 	}
 
@@ -48,45 +85,59 @@ func login(w http.ResponseWriter, req *http.Request) {
 	authCode := contentMap["authCode"]
 
 	if security.ValidateAuthCode(authCode) {
+		fmt.Println("Good credentials!")
 		cookie := http.Cookie{Name: "authCode", Value: authCode, HttpOnly: true}
 		http.SetCookie(w, &cookie)
-	}
+		sessionId := database.GetSecurityValue(security.SESSION_ID)
+		if len(sessionId) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("You have to add a sessionId first!"))
+			return
+		}
 
-	sessionId := database.GetSecurityValue(security.SESSION_ID)
-	if len(sessionId) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("You have to add a sessionId firstly"))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(sessionId))
 		return
 	}
-
-	w.Write([]byte(sessionId))
+	fmt.Println("Bad credentials!")
+	w.WriteHeader(http.StatusNetworkAuthenticationRequired)
+	w.Write([]byte("Bad credentials!"))
 }
 
 func register(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
+
+	if req.Method != http.MethodPost && req.Method != http.MethodOptions {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	if enableCORS(&w, req) {
+		return
+	}
+
 	res := database.GetSecurityValue(security.AUTH_TOKEN)
 	if len(res) != 0 {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(security.ALREADY_REGISTERED_STATUS)
 		w.Write([]byte("You have already registered!"))
 		return
 	}
+
 	content, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		utils.Logg(err)
 		fmt.Fprint(w, "Internal error!")
 	}
+
 	contentMap := make(map[string]string)
 	json.Unmarshal(content, &contentMap)
 	database.AddSecurityInfo(security.AUTH_TOKEN, contentMap["authCode"])
+	database.AddSecurityInfo(security.SESSION_ID, contentMap["sessionId"])
 	w.Write([]byte("You have successfully registered!"))
-
 }
 
 func getChat(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	vars := mux.Vars(req)
 	stringId, ok := vars["id"]
@@ -104,6 +155,7 @@ func getChat(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		fmt.Print(id)
+
 		w.Write(serialize(database.ConstructChatDTO(database.GetChat(id))))
 	}
 }
@@ -137,25 +189,25 @@ func createWsConnection(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			isFirstPackage = false
-			break
+
 		case ENCRYPTED_MESSAGE:
 			handleEncryptedMessage(reciveMessage)
-			break
+
 		case CLEAR_MESSAGE:
 			handleClearMessage(reciveMessage)
-			break
+
 		case USER_UPDATE:
 			handleUserUpdate(reciveMessage)
-			break
+
 		case REMOVE_USER_IN_CHAT:
 			//TO DO
-			break
+
 		case ADD_USER_IN_CHAT:
 			//TO DO
-			break
+
 		case ADD_SESSION_ID:
 			handleAddSessionId(reciveMessage)
-			break
+
 		}
 
 	}
@@ -165,6 +217,7 @@ func createWsConnection(w http.ResponseWriter, r *http.Request) {
 func (sv Secure_Server) Run() {
 
 	router := mux.NewRouter()
+	router.HandleFunc("/is-open", verifyIsOn)
 	router.HandleFunc("/chat/{id}", getChat)
 	router.HandleFunc("/connect-ws", createWsConnection)
 	router.HandleFunc("/login", login)
@@ -175,6 +228,6 @@ func (sv Secure_Server) Run() {
 	err := http.ListenAndServe(":"+sv.Port, router)
 
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Println(err.Error())
 	}
 }

@@ -35,6 +35,11 @@ public class UserController {
 		user.setSessionId(UUID.randomUUID().toString());
 		return userService.save(user);
 	}
+
+	@GetMapping("/user/auth/{sessionId}")
+	public User createTemporaryUser(@PathVariable String sessionId) {
+		return userService.getUserBySessionId(sessionId);
+	}
 	
 	@MessageMapping("/user/change/name")
 	public void processChangeUserName(String newName, SimpMessageHeaderAccessor  headerAccessor) {

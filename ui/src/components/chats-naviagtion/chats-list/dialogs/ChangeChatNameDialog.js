@@ -20,7 +20,7 @@ import DraggablePaperComponent from "../../../../app/DraggablePaperComponent";
 export default function ChangeChatNameDialog(props) {
   const [chatName, setChatName] = React.useState(props.chat?.name);
 
-  const wsClient = React.useContext(WsClientContext);
+  const wsClient = React.useContext(WsClientContext).wsClient;
 
   React.useEffect(() => {
     setChatName(props.chat?.name);

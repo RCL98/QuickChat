@@ -19,3 +19,6 @@ export const CONVERSATION = "CONVERSATION";
 // APP CONSTANTS
 export const principalChatId = "2021";
 export const serverHost = process.env.NODE_ENV !== "development" ? "" : "http://localhost:8080";
+export const desktopApp = process.env.NODE_ENV !== "development" ? "" : "http://localhost:8090";
+export const NOT_REGISTERED_STATUS = 407;
+export const ALREADY_REGISTERED_STATUS = 408;

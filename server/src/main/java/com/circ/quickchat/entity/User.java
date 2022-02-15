@@ -31,6 +31,9 @@ public class User {
 	
 	@Column(name = "name")
 	private String name;
+
+	@Column(name = "is_temp")
+	private Boolean isTemp;
 	
 	@Column(name = "created_at")
 	private Timestamp createdAt;

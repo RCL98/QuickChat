@@ -12,7 +12,7 @@ import { chatUpdateLastMessage } from "../../reducers/chatsSlice";
 import { WsClientContext } from "../../app/WsClientContext";
 
 export default function NewMessageBox() {
-  const wsClient = React.useContext(WsClientContext);
+  const wsClient = React.useContext(WsClientContext).wsClient;
 
   const [content, setContent] = React.useState("");
   const [isWriting, setIsWriting] = React.useState(false);

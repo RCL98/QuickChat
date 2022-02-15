@@ -21,7 +21,7 @@ import getUsersAvatars from "../../../../app/getUsersAvatars";
 import { serverHost } from "../../../../app/constants";
 
 export default function AddNewUsersDialog(props) {
-  const wsClient = React.useContext(WsClientContext);
+  const wsClient = React.useContext(WsClientContext).wsClient;
 
   const [lookupText, setLookupText] = React.useState("");
   const [checked, setChecked] = React.useState([]);

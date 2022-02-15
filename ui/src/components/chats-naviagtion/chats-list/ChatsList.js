@@ -19,6 +19,7 @@ import { CONVERSATION } from "../../../app/constants";
 const chatsListStyles = makeStyles((theme) => {
   return {
     chatList: {
+      width: "100%",
       overflowY: "auto",
       overflowX: "hidden",
       paddingRight: "1%",

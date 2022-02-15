@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"go_secure/database"
 	"go_secure/http_server"
+
 	"gorm.io/gorm"
 )
 
@@ -20,6 +22,7 @@ type Message struct {
 }
 
 func main() {
+	fmt.Println("Go server started")
 	database.MigrateDatabase()
 	sv := http_server.Secure_Server{Port: "8090"}
 	sv.Run()
