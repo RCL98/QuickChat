@@ -7,6 +7,11 @@ type WebsocketMessage struct {
 	MessageType string      `json:"messageType"`
 }
 
+type WsMessageDTO struct {
+	content     interface{} `json:"content"`
+	messageType string      `json:"messageType"`
+}
+
 type MessageDTO struct {
 	Id         uint      `json:"id"`
 	Content    string    `json:"content"`
@@ -34,4 +39,8 @@ type SimpleChatDTO struct {
 	Name        string
 	LastMessage MessageDTO
 	ChatType    string
+}
+
+type SynchronizationDTO struct {
+	alerts []WsMessageDTO
 }

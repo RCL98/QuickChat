@@ -106,3 +106,33 @@ func getSessionId(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Write([]byte(sessionId))
 }
+
+func synchronizationWithServer(w http.ResponseWriter, req *http.Request) {
+	if enableCORS(&w, req) {
+		return
+	}
+
+	if req.Method != http.MethodPost {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if security.ValidateAuthentication(w, req) {
+		return
+	}
+
+	content, err := ioutil.ReadAll(req.Body)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		fmt.Print(err)
+		return
+	}
+
+	synchronizationDTO := database.SynchronizationDTO{}
+	json.Unmarshal(content, &synchronizationDTO)
+
+	database.Synchronize(synchronizationDTO)
+
+}
