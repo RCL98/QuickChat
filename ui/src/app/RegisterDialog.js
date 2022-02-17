@@ -18,15 +18,29 @@ import axios from "axios";
 import store from "./store";
 
 export default function RegisterDialog(props) {
+  const [username, setUsername] = React.useState(store.getState().profile.username);
+  const [password, setPassword] = React.useState(null);
+
   const handleClose = () => {
     props.open.setter(false);
   };
 
+  const handleChangeUsernameValue = (event) => {
+    if (event.target.value.length <= 20) {
+      setUsername(event.target.value);
+    }
+  };
+
+  const handleChangePasswordValue = (event) => {
+    setPassword(event.target.value);
+  };
+
   const handleRegister = () => {
-    console.log(document.getElementById("register-password").value);
+    console.log(`user: ${username} \n password: ${password}`);
     axios
       .post(desktopApp + "/register", {
-        authCode: document.getElementById("register-password").value,
+        username: username,
+        password: password,
         sessionId: store.getState().profile.sessionId,
       })
       .then(function (response) {
@@ -59,13 +73,40 @@ export default function RegisterDialog(props) {
               <AccountCircle sx={{ color: "action.active", mr: 1, my: 0.5 }} />
               <TextField
                 margin="dense"
-                id="register-password"
-                label="Password"
-                type="password"
+                id="register-username"
+                label="username"
+                type="text"
+                required
+                autoFocus={true}
+                value={username}
+                onChange={handleChangeUsernameValue}
+                onKeyPress={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleRegister();
+                  }
+                }}
                 fullWidth
                 variant="standard"
               />
             </Box>
+            <TextField
+              margin="dense"
+              id="register-password"
+              label="Password"
+              type="password"
+              required
+              value={password}
+              onChange={handleChangePasswordValue}
+              fullWidth
+              onKeyPress={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  handleRegister();
+                }
+              }}
+              variant="standard"
+            />
             <Button onClick={handleClose} color="info">
               Are you already registered to the Desktop app?
             </Button>

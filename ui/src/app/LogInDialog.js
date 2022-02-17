@@ -34,11 +34,24 @@ import { WsClientContext } from "./WsClientContext";
 export default function LogInDialog(props) {
   const [wrongPassword, setWrongPassword] = React.useState(false);
   const [openRegisterDialog, setOpenRegisterDialog] = React.useState(false);
+  const [username, setUsername] = React.useState(store.getState().profile.username);
+  const [password, setPassword] = React.useState(null);
+
   const wsClient = React.useContext(WsClientContext).wsClient;
   const wsDesktopClient = React.useContext(WsClientContext).wsDesktopClient;
 
   const handleClose = () => {
     props.open.setter(false);
+  };
+
+  const handleChangeUsernameValue = (event) => {
+    if (event.target.value.length <= 20) {
+      setUsername(event.target.value);
+    }
+  };
+
+  const handleChangePasswordValue = (event) => {
+    setPassword(event.target.value);
   };
 
   const connectToServer = (sessionId) => {
@@ -68,11 +81,11 @@ export default function LogInDialog(props) {
   };
 
   const handleLogin = () => {
-    let authCode = document.getElementById("login-password").value;
-    console.log(authCode);
+    console.log(`user: ${username} \n password: ${password}`);
     axios
       .post(desktopApp + "/login", {
-        authCode: authCode,
+        username: username,
+        password: password,
       })
       .then(function (response) {
         console.log(response);
@@ -82,7 +95,7 @@ export default function LogInDialog(props) {
           const sessionId = response.data;
           store.dispatch(sessionIdChanged(sessionId));
 
-          let socket = connectWebSocketsDesktop(authCode);
+          let socket = connectWebSocketsDesktop(password);
           props.setWsDesktopClient(socket);
           store.dispatch(statusOfWsDesktopChanged(true));
 
@@ -121,23 +134,44 @@ export default function LogInDialog(props) {
           <Box sx={{ display: "flex", alignItems: "flex-end" }}>
             <AccountCircle sx={{ color: "action.active", mr: 1, my: 0.5 }} />
             <TextField
-              error={wrongPassword}
               margin="dense"
-              autoFocus
-              id="login-password"
-              label="Password"
-              type="password"
-              fullWidth
+              id="login-username"
+              label="username"
+              type="text"
+              required
+              autoFocus={true}
+              value={username}
+              onChange={handleChangeUsernameValue}
               onKeyPress={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
                   handleLogin();
                 }
               }}
+              fullWidth
               variant="standard"
-              helperText={wrongPassword ? "The password inputed is not correct!" : null}
             />
           </Box>
+          <TextField
+            error={wrongPassword}
+            margin="dense"
+            autoFocus
+            id="login-password"
+            label="Password"
+            type="password"
+            fullWidth
+            required
+            value={password}
+            onChange={handleChangePasswordValue}
+            onKeyPress={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleLogin();
+              }
+            }}
+            variant="standard"
+            helperText={wrongPassword ? "The password inputed is not correct!" : null}
+          />
           <Button onClick={changeToRegistration} color="info">
             Are you not registered to the Desktop app yet?
           </Button>
