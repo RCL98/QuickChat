@@ -227,6 +227,7 @@ func (sv Secure_Server) Run() {
 	router.HandleFunc("/register", register)
 	router.HandleFunc("/security/sessionid", getSessionId)
 	router.HandleFunc("/chat/create", createChat)
+	router.HandleFunc("/synchronization", synchronizationWithServer)
 
 	err := http.ListenAndServe(":"+sv.Port, router)
 
