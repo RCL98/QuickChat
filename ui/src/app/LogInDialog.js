@@ -14,16 +14,28 @@ import DraggablePaperComponent from "./DraggablePaperComponent";
 import { desktopApp, NOT_REGISTERED_STATUS, serverHost } from "./constants";
 
 import store from "./store";
-import { sessionIdChanged, userIdChanged, usernameChanged } from "../reducers/profileSlice";
+import {
+  avatarChanged,
+  sessionIdChanged,
+  statusOfWsDesktopChanged,
+  userIdChanged,
+  usernameChanged,
+  userStatusChanged,
+} from "../reducers/profileSlice";
 
 import axios from "axios";
 import connectWebSocketsServer from "./ConnectWebSocketsServer";
 import connectWebSocketsDesktop from "./ConnectWebSocketsDesktop";
 import RegisterDialog from "./RegisterDialog";
 
+import { Buffer } from "buffer";
+import { WsClientContext } from "./WsClientContext";
+
 export default function LogInDialog(props) {
   const [wrongPassword, setWrongPassword] = React.useState(false);
   const [openRegisterDialog, setOpenRegisterDialog] = React.useState(false);
+  const wsClient = React.useContext(WsClientContext).wsClient;
+  const wsDesktopClient = React.useContext(WsClientContext).wsDesktopClient;
 
   const handleClose = () => {
     props.open.setter(false);
@@ -34,9 +46,22 @@ export default function LogInDialog(props) {
       .get(serverHost + `/user/auth/${sessionId}`)
       .then(function (response) {
         if (response.status === 200) {
+          console.log(response.data);
           store.dispatch(usernameChanged(response.data.name));
           store.dispatch(userIdChanged(response.data.id));
-          connectWebSocketsServer(sessionId, props.setWsClient, props.setIsConnected);
+          store.dispatch(userStatusChanged(response.data.isTemp));
+          connectWebSocketsServer(sessionId, props.setWsClient, props.setIsConnected, wsDesktopClient);
+          axios
+            .get(serverHost + `/photos/get/${response.data.id}`, {
+              responseType: "arraybuffer",
+            })
+            .then((response_) => {
+              console.log(response_);
+              store.dispatch(
+                avatarChanged("data:image/jpeg;base64," + Buffer.from(response_.data, "binary").toString("base64"))
+              );
+            })
+            .catch((error) => console.error(error));
         }
       })
       .catch((error) => console.error(error));
@@ -54,21 +79,18 @@ export default function LogInDialog(props) {
         if (response.status === NOT_REGISTERED_STATUS) {
           changeToRegistration();
         } else if (response.status === 200) {
-          console.log(response.data);
           const sessionId = response.data;
           store.dispatch(sessionIdChanged(sessionId));
 
           let socket = connectWebSocketsDesktop(authCode);
           props.setWsDesktopClient(socket);
+          store.dispatch(statusOfWsDesktopChanged(true));
 
           props.open.setter(false);
-          console.log(sessionId);
-          console.log(props.wsClient);
-          if (props.wsClient === null) {
+          if (wsClient === null) {
             connectToServer(sessionId);
           } else {
-            console.log("am intrat");
-            props.wsClient.send("/user/register", {}, {});
+            wsClient.send("/user/register", {}, {});
           }
         }
       })
@@ -101,10 +123,17 @@ export default function LogInDialog(props) {
             <TextField
               error={wrongPassword}
               margin="dense"
+              autoFocus
               id="login-password"
               label="Password"
               type="password"
               fullWidth
+              onKeyPress={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  handleLogin();
+                }
+              }}
               variant="standard"
               helperText={wrongPassword ? "The password inputed is not correct!" : null}
             />

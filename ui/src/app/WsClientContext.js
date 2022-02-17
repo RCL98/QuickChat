@@ -54,17 +54,7 @@ const WsClientContextProvider = ({ children }) => {
   const whatToRender = () => {
     if (isConnected) {
       // the Provider gives access to the context to its children
-      return (
-        <WsClientContext.Provider
-          value={{
-            wsClient: wsClient,
-            wsDesktopClient: wsDesktopClient,
-            setOpenLoginDialog: setOpenLoginDialog,
-          }}
-        >
-          {children}
-        </WsClientContext.Provider>
-      );
+      return children;
     }
     return (
       <div
@@ -87,16 +77,23 @@ const WsClientContextProvider = ({ children }) => {
   };
 
   return (
-    <div id="context-div" style={{ width: "100%", height: "100%" }}>
-      {whatToRender()}
-      <LogInDialog
-        open={{ value: openLoginDialog, setter: setOpenLoginDialog }}
-        wsClient={wsClient}
-        setWsClient={setWsClient}
-        setWsDesktopClient={setWsDesktopClient}
-        setIsConnected={setIsConnected}
-      />
-    </div>
+    <WsClientContext.Provider
+      value={{
+        wsClient: wsClient,
+        wsDesktopClient: wsDesktopClient,
+        setOpenLoginDialog: setOpenLoginDialog,
+      }}
+    >
+      <div id="context-div" style={{ width: "100%", height: "100%" }}>
+        {whatToRender()}
+        <LogInDialog
+          open={{ value: openLoginDialog, setter: setOpenLoginDialog }}
+          setWsClient={setWsClient}
+          setWsDesktopClient={setWsDesktopClient}
+          setIsConnected={setIsConnected}
+        />
+      </div>
+    </WsClientContext.Provider>
   );
 };
 

@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 import axios from "axios";
 import getUsersAvatars from "../../../app/getUsersAvatars";
-import { serverHost, GROUP, CONVERSATION } from "../../../app/constants";
+import { serverHost, GROUP, CONVERSATION, desktopApp } from "../../../app/constants";
 
 export default function StartChatDialog(props) {
   const [lookupText, setLookupText] = React.useState("");
@@ -30,7 +30,11 @@ export default function StartChatDialog(props) {
   const [groupName, setGroupName] = React.useState("");
   const [groupPhoto, setGroupPhoto] = React.useState(null);
 
-  const sessionId = useSelector((state) => state.profile.sessionId);
+  const [sessionId, isTemp, wsDesktopConnectionOn] = useSelector((state) => [
+    state.profile.sessionId,
+    state.profile.isTemp,
+    state.profile.wsDesktopConnectionOn,
+  ]);
 
   const dispatch = useDispatch();
 
@@ -73,6 +77,14 @@ export default function StartChatDialog(props) {
       })
       .then(async function (response) {
         const chatId = response.data.id;
+        if (!isTemp && wsDesktopConnectionOn) {
+          axios
+            .post(desktopApp + "/chat/create", response.data)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => console.error(error));
+        }
         if (type === GROUP && groupPhoto !== null) {
           let formData = new FormData();
           const blob = await (await fetch(groupPhoto)).blob();

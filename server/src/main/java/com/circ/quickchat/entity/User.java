@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import DTO.RegisteredUserDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import DTO.UserDTO;
@@ -65,6 +66,10 @@ public class User {
 	public UserDTO toUserDTO() {
 		return UserDTO.builder().id(this.id)
 				.name(this.name).build();
+	}
+
+	public RegisteredUserDTO toRegisteredUserDTO() {
+		return RegisteredUserDTO.builder().id(this.id).name(this.name).isTemp(this.isTemp).build();
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import DTO.RegisteredUserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -30,7 +31,7 @@ public class UserController {
 	private UserAllert userAlert;
 	
 
-	@CrossOrigin(origins = "http://localhost:3000")
+	@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 	@PostMapping("/user/create")
 	public User createTemporaryUser(@RequestBody User user) {
 		user.setSessionId(UUID.randomUUID().toString());
@@ -39,8 +40,8 @@ public class UserController {
 	}
 
 	@GetMapping("/user/auth/{sessionId}")
-	public User getRegisteredUser(@PathVariable String sessionId) {
-		return userService.getUserBySessionId(sessionId);
+	public RegisteredUserDTO getRegisteredUser(@PathVariable String sessionId) {
+		return userService.getUserBySessionId(sessionId).toRegisteredUserDTO();
 	}
 
 	@MessageMapping("/user/register")

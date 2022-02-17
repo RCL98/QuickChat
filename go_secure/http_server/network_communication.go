@@ -64,8 +64,12 @@ func handleAuthentication(wsMessage database.WebsocketMessage) bool {
 
 func createChat(w http.ResponseWriter, req *http.Request) {
 
-	if req.Method != http.MethodPost {
+	if req.Method != http.MethodPost && req.Method != http.MethodOptions {
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if enableCORS(&w, req) {
 		return
 	}
 

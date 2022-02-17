@@ -57,7 +57,6 @@ func verifyIsOn(w http.ResponseWriter, req *http.Request) {
 
 func login(w http.ResponseWriter, req *http.Request) {
 
-	fmt.Println(req.Method)
 	if req.Method != http.MethodPost && req.Method != http.MethodOptions {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -85,7 +84,6 @@ func login(w http.ResponseWriter, req *http.Request) {
 	authCode := contentMap["authCode"]
 
 	if security.ValidateAuthCode(authCode) {
-		fmt.Println("Good credentials!")
 		cookie := http.Cookie{Name: "authCode", Value: authCode, HttpOnly: true}
 		http.SetCookie(w, &cookie)
 		sessionId := database.GetSecurityValue(security.SESSION_ID)
@@ -99,7 +97,6 @@ func login(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(sessionId))
 		return
 	}
-	fmt.Println("Bad credentials!")
 	w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 	w.Write([]byte("Bad credentials!"))
 }

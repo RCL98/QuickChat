@@ -27,7 +27,7 @@ import store from "./store";
 
 import axios from "axios";
 
-const messageFilter = async (message) => {
+const messageFilter = async (message, wsDesktop) => {
   // called when the client receives a STOMP message from the server
   if (message.body) {
     const generalMessage = JSON.parse(message.body);
@@ -60,6 +60,14 @@ const messageFilter = async (message) => {
             .catch((error) => console.error(error));
         } else {
           store.dispatch(chatAdded(generalMessage.content));
+        }
+        if (wsDesktop !== null) {
+          axios
+            .post(constants.desktopApp + "/chat/create", generalMessage.content)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => console.error(error));
         }
         break;
 
@@ -143,14 +151,14 @@ const messageFilter = async (message) => {
   }
 };
 
-export default function connectWebSocketsServer(sessionId, setWsClient, setIsConnected) {
+export default function connectWebSocketsServer(sessionId, setWsClient, setIsConnected, wsDesktopClient) {
   const ws = new SockJS(`${constants.serverHost}/ws-quick?sessionId=${sessionId}`);
   const client = Stomp.over(ws);
 
   const connectCallback = function () {
     setIsConnected(true);
     setWsClient(client);
-    client.subscribe(`/user/${sessionId}/usertell`, messageFilter);
+    client.subscribe(`/user/${sessionId}/usertell`, (message) => messageFilter(message, wsDesktopClient));
   };
 
   const errorCallback = function (error) {
