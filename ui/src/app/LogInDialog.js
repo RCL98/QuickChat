@@ -86,7 +86,7 @@ export default function LogInDialog(props) {
       .post(desktopApp + "/login", {
         username: username,
         password: password,
-      })
+      }, { withCredentials: true })
       .then(function (response) {
         console.log(response);
         if (response.status === NOT_REGISTERED_STATUS) {

@@ -31,7 +31,7 @@ public class UserController {
 	private UserAllert userAlert;
 	
 
-	@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+	@CrossOrigin(origins = "*")
 	@PostMapping("/user/create")
 	public User createTemporaryUser(@RequestBody User user) {
 		user.setSessionId(UUID.randomUUID().toString());

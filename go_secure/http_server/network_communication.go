@@ -36,33 +36,24 @@ func handleEncryptedMessage(wsMessage database.WebsocketMessage) {
 	mapstructure.Decode(wsMessage.Content, &message)
 }
 
-func handleClearMessage(wsMessage database.WebsocketMessage) {
+func handleClearMessage(sessionId string, wsMessage database.WebsocketMessage) {
 	messageDTO := database.MessageDTO{}
 	mapstructure.Decode(wsMessage.Content, &messageDTO)
 	message := database.MessageDTOToMessage(messageDTO)
-	database.AddMessage(&message)
+	database.AddMessage(sessionId, &message)
 }
 
-func handleUserUpdate(wsMessage database.WebsocketMessage) {
+func handleUserUpdate(sessiondId string, wsMessage database.WebsocketMessage) {
 	userDTO := database.UserDTO{}
 	mapstructure.Decode(wsMessage.Content, &userDTO)
-	user := database.GetUserById(userDTO.Id)
+	user := database.GetUserById(sessiondId, userDTO.Id)
 	user.Name = userDTO.Name
-	database.UpdateUser(user)
+	database.UpdateUser(sessiondId, user)
 
-}
-
-func handleAddSessionId(wsMessage database.WebsocketMessage) {
-	sessionId := fmt.Sprintf("%v", wsMessage.Content)
-	database.AddSecurityInfo(security.SESSION_ID, sessionId)
-}
-
-func handleAuthentication(wsMessage database.WebsocketMessage) bool {
-	return security.ValidateAuthCode(fmt.Sprintf("%v",
-		wsMessage.Content))
 }
 
 func createChat(w http.ResponseWriter, req *http.Request) {
+	sessionId, err := req.Cookie(security.COOKIE_SESSION_ID)
 
 	if req.Method != http.MethodPost && req.Method != http.MethodOptions {
 		w.WriteHeader(http.StatusBadRequest)
@@ -89,30 +80,20 @@ func createChat(w http.ResponseWriter, req *http.Request) {
 	chatDTO := database.ChatDTO{}
 	json.Unmarshal(content, &chatDTO)
 
-	chat := database.ChatDTOToChat(chatDTO)
+	chat := database.ChatDTOToChat(sessionId.Value, chatDTO)
 
-	database.AddChat(&chat)
-}
-
-func getSessionId(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if !security.ValidateAuthentication(w, req) {
-		return
-	}
-	sessionId := database.GetSecurityValue(security.SESSION_ID)
-	if len(sessionId) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("You have to add a sessionId first!"))
-		return
-	}
-	w.Write([]byte(sessionId))
+	database.AddChat(sessionId.Value, &chat)
 }
 
 func synchronizationWithServer(w http.ResponseWriter, req *http.Request) {
 	if enableCORS(&w, req) {
+		return
+	}
+
+	sessionId, errCookie := req.Cookie(security.COOKIE_SESSION_ID)
+
+	if errCookie != nil {
+		utils.Logg(errCookie)
 		return
 	}
 
@@ -137,6 +118,6 @@ func synchronizationWithServer(w http.ResponseWriter, req *http.Request) {
 	synchronizationDTO := database.SynchronizationDTO{}
 	json.Unmarshal(content, &synchronizationDTO)
 
-	database.Synchronize(synchronizationDTO)
+	database.Synchronize(sessionId.Value, synchronizationDTO)
 
 }

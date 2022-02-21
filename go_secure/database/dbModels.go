@@ -2,6 +2,13 @@ package database
 
 import "gorm.io/gorm"
 
+type AuthTable struct {
+	gorm.Model
+	Username  string `gorm:"unique"`
+	Password  string
+	SessionId string `gorm:"unique"`
+}
+
 type Message struct {
 	gorm.Model
 	ChatId   uint

@@ -6,9 +6,11 @@ import (
 )
 
 func ValidateAuthentication(w http.ResponseWriter, req *http.Request) bool {
-	authCookie, err := req.Cookie("authCode")
+	sessionId, err := req.Cookie(COOKIE_SESSION_ID)
 
-	if err != nil || !ValidateAuthCode(authCookie.Value) {
+	authUser := database.GetUserBySessionId(sessionId.Value)
+
+	if err != nil || !(len(authUser.SessionId) > 0) {
 		w.WriteHeader(http.StatusNetworkAuthenticationRequired)
 		w.Write([]byte("You have to be authentificate firstly"))
 		return true
@@ -16,7 +18,16 @@ func ValidateAuthentication(w http.ResponseWriter, req *http.Request) bool {
 	return false
 }
 
-func ValidateAuthCode(authCode string) bool {
-	authToken := database.GetSecurityValue(AUTH_TOKEN)
-	return authToken == authCode
+func ValidCredentials(login string, password string) (bool, string) {
+	authUser := database.GetAuthUser(login)
+	return authUser.Username == login && authUser.Password == password, authUser.SessionId
+}
+
+func SaveNewUser(login string, password string, sessionId string) bool {
+	authUser := database.GetAuthUser(login)
+	if authUser.ID != 0 {
+		return false
+	}
+	database.SaveAuthUser(database.AuthTable{Username: login, Password: password, SessionId: sessionId})
+	return true
 }

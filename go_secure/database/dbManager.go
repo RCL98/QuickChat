@@ -1,88 +1,116 @@
 package database
 
 import (
+	"fmt"
 	"go_secure/utils"
-
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 const dbName = "anonymous_quickchat.db"
 
-var dbConn *gorm.DB
+var AuthDbConn *gorm.DB
+var UserToDB map[string]*gorm.DB = make(map[string]*gorm.DB)
 
-func MigrateDatabase() {
+func MigrateAuthTable() {
 	var err error
-	dbConn, err = gorm.Open(sqlite.Open(dbName))
+	AuthDbConn, err = gorm.Open(sqlite.Open(dbName))
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	AuthDbConn.AutoMigrate(&AuthTable{})
+}
+
+func SaveAuthUser(authUser AuthTable) {
+	AuthDbConn.Create(&authUser)
+}
+
+func GetUserBySessionId(sessionId string) AuthTable {
+	var authUser AuthTable
+	AuthDbConn.Find(&authUser, "session_id = ?", sessionId)
+	return authUser
+}
+
+func GetAuthUser(login string) AuthTable {
+	authUser := AuthTable{}
+	AuthDbConn.Find(&authUser, "username = ?", login)
+	return authUser
+}
+
+func MigrateDatabase(sessionId string) {
+	var err error
+	UserToDB[sessionId], err = gorm.Open(sqlite.Open(sessionId + ".db"))
 
 	if err != nil {
 		utils.Logg(err)
 	}
-	dbConn.AutoMigrate(&Message{})
-	dbConn.AutoMigrate(&User{})
-	dbConn.AutoMigrate(&Chat{})
-	dbConn.AutoMigrate(&SecurityInfo{})
+	UserToDB[sessionId].AutoMigrate(&Message{})
+	UserToDB[sessionId].AutoMigrate(&User{})
+	UserToDB[sessionId].AutoMigrate(&Chat{})
+	UserToDB[sessionId].AutoMigrate(&SecurityInfo{})
+	UserToDB[sessionId].AutoMigrate(&User{})
+
 }
 
-func GetSecurityValue(objectType string) string {
-	var securityInfo SecurityInfo
-	dbConn.Find(&securityInfo, "object_type = ?", objectType)
-	return securityInfo.Value
+func AddUsers(sessionId string, users []User) {
+	UserToDB[sessionId].Create(users)
 }
 
-func AddSecurityInfo(objectType string, value string) {
-	securityInfo := SecurityInfo{Value: value, ObjectType: objectType}
-	dbConn.Create(&securityInfo)
+func CloseConnectionDB(sessionId string) {
+	sqlDB, err := UserToDB[sessionId].DB()
+	if err != nil {
+		utils.Logg(err)
+	}
+	sqlDB.Close()
 }
 
-func AddUsers(users []User) {
-	dbConn.Create(users)
-}
-
-func GetUsers() []User {
+func GetUsers(sessionId string) []User {
 	var users []User
-	dbConn.Find(&users)
+	UserToDB[sessionId].Find(&users)
 	return users
 }
 
-func AddUser(user *User) {
-	dbConn.Create(user)
+func AddUser(sessionId string, user *User) {
+	UserToDB[sessionId].Create(user)
 }
 
-func UpdateUser(user User) {
-	dbConn.Save(&user)
+func UpdateUser(sessionId string, user User) {
+	UserToDB[sessionId].Save(&user)
 }
 
-func AddMessage(message *Message) {
-	dbConn.Create(message)
+func AddMessage(sessionId string, message *Message) {
+	UserToDB[sessionId].Create(message)
 }
 
-func AddChat(chat *Chat) {
-	dbConn.Create(chat)
+func AddChat(sessionId string, chat *Chat) {
+	UserToDB[sessionId].Create(chat)
 }
 
-func AddUserInChat(user User, chatId uint) {
+func AddUserInChat(sessionId string, user User, chatId uint) {
 	var chat Chat
+	dbConn := UserToDB[sessionId]
 	dbConn.Find(&chat, "id = ?", chatId)
 	chat.Users = append(chat.Users, user)
 	dbConn.Save(&chat)
 }
 
-func GetChat(chatId uint64) Chat {
+func GetChat(sessionId string, chatId uint64) Chat {
 	var chat Chat
-	dbConn.Find(&chat, "id = ?", chatId)
+	UserToDB[sessionId].Find(&chat, "id = ?", chatId)
 	return chat
 }
 
-func GetUserById(userId uint) User {
+func GetUserById(sessionId string, userId uint) User {
 	var user User
-	dbConn.Find(&user, "id = ?", userId)
+	UserToDB[sessionId].Find(&user, "id = ?", userId)
 	return user
 }
 
-func GetSimpleChats() {
+func GetSimpleChats(sessionId string) {
 	var chats []Chat
-	dbConn.Find(&chats)
+	UserToDB[sessionId].Find(&chats)
 	chatsMessage := make([]SimpleChatDTO, len(chats))
 	for i, chat := range chats {
 		chatsMessage[i].ChatType = chat.Type
@@ -93,20 +121,20 @@ func GetSimpleChats() {
 		if len(chat.Messages) > 0 {
 			lastMessage = chat.Messages[len(chat.Messages)-1]
 		}
-		chatsMessage[i].LastMessage = ConstructMessageDTO(lastMessage)
+		chatsMessage[i].LastMessage = ConstructMessageDTO(sessionId, lastMessage)
 	}
 }
 
-func ConstructMessageDTO(message Message) MessageDTO {
+func ConstructMessageDTO(sessionId string, message Message) MessageDTO {
 	return MessageDTO{Id: message.ID, Content: message.Content, AuthorId: message.AuthorId,
-		CreatedAt: message.CreatedAt, ChatId: message.ChatId, AuthorName: GetUserById(message.AuthorId).Name}
+		CreatedAt: message.CreatedAt, ChatId: message.ChatId, AuthorName: GetUserById(sessionId, message.AuthorId).Name}
 }
 
-func ConstructChatDTO(chat Chat) ChatDTO {
+func ConstructChatDTO(sessionId string, chat Chat) ChatDTO {
 	messagesDTO := make([]MessageDTO, len(chat.Messages))
 
 	for i, message := range chat.Messages {
-		messagesDTO[i] = ConstructMessageDTO(message)
+		messagesDTO[i] = ConstructMessageDTO(sessionId, message)
 	}
 
 	usersDTO := make([]UserDTO, len(chat.Users))

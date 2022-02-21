@@ -33,11 +33,11 @@ type Secure_Server struct {
 }
 
 func enableCORS(w *http.ResponseWriter, req *http.Request) bool {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Authorization,  X-Requested-With")
 	if req.Method == http.MethodOptions {
-		(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Authorization,  X-Requested-With")
-		(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 		(*w).WriteHeader(http.StatusOK)
 		return true
 	}
@@ -57,19 +57,12 @@ func verifyIsOn(w http.ResponseWriter, req *http.Request) {
 
 func login(w http.ResponseWriter, req *http.Request) {
 
-	if req.Method != http.MethodPost && req.Method != http.MethodOptions {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	if enableCORS(&w, req) {
 		return
 	}
 
-	res := database.GetSecurityValue(security.AUTH_TOKEN)
-	if len(res) == 0 {
-		w.WriteHeader(security.NOT_REGISTERED_STATUS)
-		w.Write([]byte("You are not registered!"))
+	if req.Method != http.MethodPost {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -81,17 +74,20 @@ func login(w http.ResponseWriter, req *http.Request) {
 	}
 	contentMap := make(map[string]string)
 	json.Unmarshal(content, &contentMap)
-	authCode := contentMap["authCode"]
+	login := contentMap["username"]
+	password := contentMap["password"]
 
-	if security.ValidateAuthCode(authCode) {
-		cookie := http.Cookie{Name: "authCode", Value: authCode, HttpOnly: true}
+	goodCredentials, sessionId := security.ValidCredentials(login, password)
+
+	if goodCredentials {
+		cookie := http.Cookie{Name: security.COOKIE_SESSION_ID, Value: sessionId, Path: "/"}
 		http.SetCookie(w, &cookie)
-		sessionId := database.GetSecurityValue(security.SESSION_ID)
 		if len(sessionId) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("You have to add a sessionId first!"))
 			return
 		}
+		database.MigrateDatabase(sessionId)
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(sessionId))
@@ -112,13 +108,6 @@ func register(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res := database.GetSecurityValue(security.AUTH_TOKEN)
-	if len(res) != 0 {
-		w.WriteHeader(security.ALREADY_REGISTERED_STATUS)
-		w.Write([]byte("You have already registered!"))
-		return
-	}
-
 	content, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -128,13 +117,26 @@ func register(w http.ResponseWriter, req *http.Request) {
 
 	contentMap := make(map[string]string)
 	json.Unmarshal(content, &contentMap)
-	database.AddSecurityInfo(security.AUTH_TOKEN, contentMap["authCode"])
-	database.AddSecurityInfo(security.SESSION_ID, contentMap["sessionId"])
+	login := contentMap["username"]
+	password := contentMap["password"]
+	sessionId := contentMap["sessionId"]
+
+	if !security.SaveNewUser(login, password, sessionId) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Some errors at register"))
+	}
 	w.Write([]byte("You have successfully registered!"))
 }
 
 func getChat(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	sessionId, errCookie := req.Cookie(security.COOKIE_SESSION_ID)
+
+	if errCookie != nil {
+		utils.Logg(errCookie)
+		return
+	}
 
 	vars := mux.Vars(req)
 	stringId, ok := vars["id"]
@@ -153,11 +155,21 @@ func getChat(w http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Print(id)
 
-		w.Write(serialize(database.ConstructChatDTO(database.GetChat(id))))
+		w.Write(serialize(database.ConstructChatDTO(sessionId.Value, database.GetChat(sessionId.Value, id))))
 	}
 }
 
 func createWsConnection(w http.ResponseWriter, req *http.Request) {
+
+	if security.ValidateAuthentication(w, req) {
+		return
+	}
+	sessionId, errCookie := req.Cookie(security.COOKIE_SESSION_ID)
+
+	if errCookie != nil {
+		utils.Logg(errCookie)
+		return
+	}
 	conn, err := upgrader.Upgrade(w, req, nil)
 
 	isFirstPackage := true
@@ -173,6 +185,7 @@ func createWsConnection(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			utils.Logg(err)
 			conn.Close()
+			database.CloseConnectionDB(sessionId.Value)
 			return
 		}
 
@@ -184,30 +197,21 @@ func createWsConnection(w http.ResponseWriter, req *http.Request) {
 		}
 
 		switch reciveMessage.MessageType {
-		case AUTHENTICATION:
-			if !handleAuthentication(reciveMessage) {
-				conn.Close()
-				return
-			}
-			isFirstPackage = false
 
 		case ENCRYPTED_MESSAGE:
 			handleEncryptedMessage(reciveMessage)
 
 		case CLEAR_MESSAGE:
-			handleClearMessage(reciveMessage)
+			handleClearMessage(sessionId.Value, reciveMessage)
 
 		case USER_UPDATE:
-			handleUserUpdate(reciveMessage)
+			handleUserUpdate(sessionId.Value, reciveMessage)
 
 		case REMOVE_USER_IN_CHAT:
 			//TO DO
 
 		case ADD_USER_IN_CHAT:
 			//TO DO
-
-		case ADD_SESSION_ID:
-			handleAddSessionId(reciveMessage)
 
 		default:
 			fmt.Print("UNKNOWN MESSAGE")
@@ -225,7 +229,6 @@ func (sv Secure_Server) Run() {
 	router.HandleFunc("/connect-ws", createWsConnection)
 	router.HandleFunc("/login", login)
 	router.HandleFunc("/register", register)
-	router.HandleFunc("/security/sessionid", getSessionId)
 	router.HandleFunc("/chat/create", createChat)
 	router.HandleFunc("/synchronization", synchronizationWithServer)
 
