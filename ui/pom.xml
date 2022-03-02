@@ -48,7 +48,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 					</execution>
-					<execution>
+<!-- 					<execution>
 						<id>npm uninstall</id>
 						<goals>
 							<goal>npm</goal>
@@ -56,7 +56,7 @@
 						<configuration>
 							<arguments>uninstall</arguments>
 						</configuration>
-					</execution>
+					</execution> -->
 					<execution>
 						<id>npm cache clean</id>
 						<goals>
