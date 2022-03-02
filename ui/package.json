@@ -26,8 +26,8 @@
     "ws": "^8.5.0"
   },
  "scripts": {
-    "start": "node --stack-size=16000 --optimize_for_size --max_old_space_size=2560 node_modules/.bin/react-scripts start",
-    "build": "node --stack-size=16000 --optimize_for_size --max_old_space_size=2560 node_modules/.bin/react-scripts build",
+    "start": "node --stack-size=25000 --optimize_for_size --max_old_space_size=2560 node_modules/.bin/react-scripts start",
+    "build": "node --stack-size=25000 --optimize_for_size --max_old_space_size=2560 node_modules/.bin/react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
